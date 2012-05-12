@@ -67,10 +67,9 @@ using Poco::trimRightInPlace;
 using Poco::icompare;
 
 
-class ofxIpVideoGrabber : protected ofBaseVideo, protected ofThread {
+class ofxIpVideoGrabber : public ofBaseVideo, protected ofThread {
     
 public:
-    
     
     ofxIpVideoGrabber();
     virtual ~ofxIpVideoGrabber();
