@@ -144,6 +144,7 @@ private:
     int ci; // current image index
     ofImage image[2]; // image buffer.  this flips
     bool isNewFrameLoaded;       // is there a new frame ready to be uploaded to glspace
+    bool isBackBufferReady;
     
     unsigned long t0; // init time
     unsigned long elapsedTime;

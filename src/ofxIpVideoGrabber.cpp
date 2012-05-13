@@ -50,7 +50,8 @@ ofxIpVideoGrabber::ofxIpVideoGrabber() : ofBaseVideo(), ofThread() {
     image[1] = ofImage();
     image[1].setUseTexture(false);
 
-    isNewFrameLoaded = false;
+    isBackBufferReady = false;
+    isNewFrameLoaded  = false;
     
     // maybe we don't want to do this so it will be more like a normal grabber ... ?
     //ofAddListener(ofEvents.update, this, &ofxIpVideoGrabber::update);
@@ -118,6 +119,9 @@ void ofxIpVideoGrabber::threadedFunction(){
     try {
         session.setHost(uri.getHost());
         session.setPort(uri.getPort());
+        
+        session.setKeepAlive(true);
+        session.setTimeout(Poco::Timespan(2, 0));
         
         string path(uri.getPathAndQuery());
         if (path.empty()) path = "/";
@@ -231,7 +235,7 @@ void ofxIpVideoGrabber::threadedFunction(){
                         // there is a jpeg in the buffer
                         // get the back image (ci^1)
                         image[ci^1].loadImage(buffer); 
-                        isNewFrameLoaded = true;
+                        isBackBufferReady = true;
                     }
                     unlock();
                     nFrames++; // incrase frame cout
@@ -279,11 +283,13 @@ bool ofxIpVideoGrabber::isFrameNew() {
 
 //--------------------------------------------------------------
 unsigned char * ofxIpVideoGrabber::getPixels() {
+    isNewFrameLoaded = false;
     return image[ci].getPixels();
 }
 
 //--------------------------------------------------------------
 ofPixelsRef ofxIpVideoGrabber::getPixelsRef() {
+    isNewFrameLoaded = false;
     return image[ci].getPixelsRef();
 }
 
@@ -305,7 +311,7 @@ void ofxIpVideoGrabber::update(ofEventArgs & a) {
 //--------------------------------------------------------------
 void ofxIpVideoGrabber::update() {
     // do opengl texture loading from the main update thread
-    if(bIsConnected && isNewFrameLoaded) {
+    if(bIsConnected && isBackBufferReady) {
         
         lock();  // lock down the thread!
         {
@@ -341,9 +347,11 @@ void ofxIpVideoGrabber::update() {
             
             // load the texture from pixels
             image[ci].update();
+            
+            isNewFrameLoaded = true;
         }
         
-        isNewFrameLoaded = false;
+        isBackBufferReady = false;
         
         unlock();
     }
@@ -351,10 +359,12 @@ void ofxIpVideoGrabber::update() {
 
 //--------------------------------------------------------------
 void ofxIpVideoGrabber::draw(int x, int y){
+    isNewFrameLoaded = false;
     image[ci].draw(x,y);
 }
 
 void ofxIpVideoGrabber::draw(int x, int y, int width, int height) {
+    isNewFrameLoaded = false;
     image[ci].draw(x,y,width,height);
 }
 
