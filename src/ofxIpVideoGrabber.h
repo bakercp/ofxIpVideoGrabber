@@ -66,14 +66,16 @@ using Poco::trimRightInPlace;
 
 using Poco::icompare;
 
-
-class ofxIpVideoGrabber : public ofBaseVideo, protected ofThread {
-    
+class ofxIpVideoGrabber : public ofBaseVideoDraws, protected ofThread {
 public:
-    
     ofxIpVideoGrabber();
     virtual ~ofxIpVideoGrabber();
     
+    void update();
+    
+    void update(ofEventArgs & a);
+    void exit(ofEventArgs & a);
+
     void connect();
     void disconnect();
     void waitForDisconnect();
@@ -85,21 +87,26 @@ public:
     // ofBaseHasPixels
 	unsigned char * getPixels();
 	ofPixelsRef getPixelsRef();
+    
+    // ofBaseHasTexture
+    ofTexture & getTextureReference();
+	void setUseTexture(bool bUseTex);
+
+    // ofBaseDraws
+    void draw(float x,float y);
+	void draw(float x,float y,float w, float h);
+	void draw(const ofPoint & point);
+	void draw(const ofRectangle & rect);
+    
+    void setAnchorPercent(float xPct, float yPct);
+    void setAnchorPoint(float x, float y);
+	void resetAnchor();
+    
     float getWidth();
     float getHeight();
     
-    // ofBaseUpdates
-    void update();
-
-    void update(ofEventArgs & a);
-    void exit(ofEventArgs & a);
-    
-    void draw(int x, int y);
-    void draw(int x, int y, int width, int height);
-    
-    float getFps();
-    float getBps();
-    
+    float getFrameRate();
+    float getBitRate();
     
     // set video URI
     void setURI(string uri);
@@ -113,7 +120,6 @@ public:
     
     string getUsername();
     string getPassword();
-    
     
     // proxy server
     void setProxyUsername(string username);
@@ -142,7 +148,8 @@ private:
 
     
     int ci; // current image index
-    ofImage image[2]; // image buffer.  this flips
+    ofImage image[2]; // image double buffer.  this flips
+    ofImage img;
     bool isNewFrameLoaded;       // is there a new frame ready to be uploaded to glspace
     bool isBackBufferReady;
     
@@ -155,7 +162,6 @@ private:
     
     unsigned long nFrames;
     unsigned long lastFrameTime;
-    float fps; // frames / second
     
     URI     uri;
     HTTPBasicCredentials credentials;

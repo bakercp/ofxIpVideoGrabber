@@ -36,33 +36,30 @@
 #define BUF_LEN 512000 // 8 * 65536 = 512 kB
 
 //--------------------------------------------------------------
-ofxIpVideoGrabber::ofxIpVideoGrabber() : ofBaseVideo(), ofThread() {
+ofxIpVideoGrabber::ofxIpVideoGrabber() : ofBaseVideoDraws(), ofThread() {
+
     
     bIsConnected = false;
-    
-    ci = 0;
-    
+    ci = 0; // current index
+    // prepare the buffer
     image[0] = ofImage();
-    image[0].setUseTexture(false); // we cannot use textures b/c loading data
+    image[0].setUseTexture(false); 
+    image[1] = ofImage();
+    image[1].setUseTexture(false);  // we cannot use textures b/c loading data
                                     // happens in another thread an opengl  
                                     // requires a single thread.
 
-    image[1] = ofImage();
-    image[1].setUseTexture(false);
-
+    img.allocate(1,1, OF_IMAGE_COLOR); // allocate something so it won't throw errors
+    
     isBackBufferReady = false;
     isNewFrameLoaded  = false;
     
-    // maybe we don't want to do this so it will be more like a normal grabber ... ?
-    //ofAddListener(ofEvents.update, this, &ofxIpVideoGrabber::update);
-    ofAddListener(ofEvents().exit, this, &ofxIpVideoGrabber::exit);
-
+    ofAddListener(ofEvents().exit, this, &ofxIpVideoGrabber::exit); // for cleanup
 }
 
 //--------------------------------------------------------------
 ofxIpVideoGrabber::~ofxIpVideoGrabber() {
-    //
-    //
+    stopThread();
 }
 
 
@@ -85,7 +82,7 @@ void ofxIpVideoGrabber::waitForDisconnect() {
         }
         waitForThread(true); // close it all down (politely)
     } else {
-        ofLog(OF_LOG_ERROR, "ofxIpVideoGrabber: Not connected.  Connect first.");
+        ofLog(OF_LOG_WARNING, "ofxIpVideoGrabber: Not connected. Connect first.");
     }
 }
 
@@ -98,7 +95,7 @@ void ofxIpVideoGrabber::disconnect() {
         }
         stopThread();
     } else {
-        ofLog(OF_LOG_ERROR, "ofxIpVideoGrabber: Not connected.  Connect first.");
+        ofLog(OF_LOG_WARNING, "ofxIpVideoGrabber: Not connected. Connect first.");
     }
 }
 
@@ -115,7 +112,6 @@ bool ofxIpVideoGrabber::isConnected() {
 //--------------------------------------------------------------
 void ofxIpVideoGrabber::threadedFunction(){
 
-    
     try {
         session.setHost(uri.getHost());
         session.setPort(uri.getPort());
@@ -145,7 +141,7 @@ void ofxIpVideoGrabber::threadedFunction(){
         rs = (istream*) &session.receiveResponse(res);
         // istream& rs = session.receiveResponse(res);
     } catch (Poco::Net::NoMessageException& e) {
-        ofLog(OF_LOG_ERROR,"ofxIpVideoGrabber: [" + getURI() +"]:" + e.displayText());
+        ofLog(OF_LOG_ERROR,"ofxIpVideoGrabber: [" + getURI() +"] : " + e.displayText());
         session.reset();
         return;
     }
@@ -283,24 +279,32 @@ bool ofxIpVideoGrabber::isFrameNew() {
 
 //--------------------------------------------------------------
 unsigned char * ofxIpVideoGrabber::getPixels() {
-    isNewFrameLoaded = false;
-    return image[ci].getPixels();
+    return img.getPixels();
 }
 
 //--------------------------------------------------------------
 ofPixelsRef ofxIpVideoGrabber::getPixelsRef() {
-    isNewFrameLoaded = false;
-    return image[ci].getPixelsRef();
+    return img.getPixelsRef();
+}
+
+//--------------------------------------------------------------
+ofTexture & ofxIpVideoGrabber::getTextureReference() {
+    return img.getTextureReference();
+}
+
+//--------------------------------------------------------------
+void ofxIpVideoGrabber::setUseTexture(bool bUseTex) {
+    img.setUseTexture(bUseTex);
 }
 
 //--------------------------------------------------------------
 float ofxIpVideoGrabber::getWidth() {
-    return image[ci].getWidth();
+    return img.getWidth();
 }
 
 //--------------------------------------------------------------
 float ofxIpVideoGrabber::getHeight() {
-    return image[ci].getHeight();
+    return img.getHeight();
 }
 
 //--------------------------------------------------------------
@@ -315,9 +319,6 @@ void ofxIpVideoGrabber::update() {
         
         lock();  // lock down the thread!
         {
-            // turn off the active texture so it will be ready for its turn
-            image[ci].setUseTexture(false); 
-            
             ci^=1; // switch buffers (ci^1) was just filled in the thread
             
             int newW = image[ci].getWidth();    // new buffer
@@ -331,22 +332,7 @@ void ofxIpVideoGrabber::update() {
             if(newW != oldW || newH != oldH) imageResized(newW, newH);
             
             // get a pixel ref for the image that was just loaded in the thread
-            const ofPixels& pix = image[ci].getPixelsRef();
-            int w = pix.getWidth();
-            int h = pix.getHeight();
-            
-            // the first time, this will always return an error b/c it's not allocated
-            int tW = image[ci].getTextureReference().getWidth();
-            int tH = image[ci].getTextureReference().getHeight();
-            
-            // reallocate only if the size has changed
-            if(tW != w || tH != h) image[ci].getTextureReference().allocate(w,h,ofGetGlInternalFormat(pix));
-            
-            // tell it that it can use the texture
-            image[ci].setUseTexture(true);
-            
-            // load the texture from pixels
-            image[ci].update();
+            img.setFromPixels(image[ci].getPixelsRef());
             
             isNewFrameLoaded = true;
         }
@@ -358,18 +344,43 @@ void ofxIpVideoGrabber::update() {
 }
 
 //--------------------------------------------------------------
-void ofxIpVideoGrabber::draw(int x, int y){
-    isNewFrameLoaded = false;
-    image[ci].draw(x,y);
-}
-
-void ofxIpVideoGrabber::draw(int x, int y, int width, int height) {
-    isNewFrameLoaded = false;
-    image[ci].draw(x,y,width,height);
+void ofxIpVideoGrabber::draw(float x, float y){
+    img.draw(x,y);
 }
 
 //--------------------------------------------------------------
-float ofxIpVideoGrabber::getFps() {
+void ofxIpVideoGrabber::draw(float x, float y, float width, float height) {
+    img.draw(x,y,width,height);
+}
+
+//--------------------------------------------------------------
+void ofxIpVideoGrabber::draw(const ofPoint & point){
+    draw( point.x, point.y);
+}
+
+//--------------------------------------------------------------
+void ofxIpVideoGrabber::draw(const ofRectangle & rect){
+    draw(rect.x, rect.y, rect.width, rect.height); 
+}
+
+//--------------------------------------------------------------
+void ofxIpVideoGrabber::setAnchorPercent(float xPct, float yPct) {
+    img.setAnchorPercent(xPct,yPct);
+}
+
+//--------------------------------------------------------------
+void ofxIpVideoGrabber::setAnchorPoint(float x, float y) {
+    img.setAnchorPoint(x,y);
+}
+
+//--------------------------------------------------------------
+void ofxIpVideoGrabber::resetAnchor() {
+    img.resetAnchor();
+}
+
+
+//--------------------------------------------------------------
+float ofxIpVideoGrabber::getFrameRate() {
     if(!bIsConnected) return 0;
     if(t0 == 0) t0 = ofGetSystemTime(); // start time
     elapsedTime = (int)(ofGetSystemTime() - t0);
@@ -377,11 +388,11 @@ float ofxIpVideoGrabber::getFps() {
 }
     
 //--------------------------------------------------------------
-float ofxIpVideoGrabber::getBps() {
+float ofxIpVideoGrabber::getBitRate() {
     if(!bIsConnected) return 0;
     if(t0 == 0) t0 = ofGetSystemTime(); // start time
     elapsedTime = (int)(ofGetSystemTime() - t0);
-    return float(nBytes) / (elapsedTime / (1000.0f));
+    return 8 * float(nBytes) / (elapsedTime / (1000.0f)); // bits per second
 }
 
 //--------------------------------------------------------------

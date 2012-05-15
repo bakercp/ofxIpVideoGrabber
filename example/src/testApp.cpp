@@ -5,32 +5,26 @@ bool locked = false;
 //--------------------------------------------------------------
 void testApp::setup(){
     ofSetFrameRate(30);
-    
     loadCameras();
-    
-    rs = new RandomSampler(ipcams.size());
-
-    
+    rs = new RandomSampler(ipcams.size());    
     // initialize connection
     for(int i = 0; i < NUM_CAMERAS; i++) {
-        IPCameraDef* cam = getRandomCamera();
-        ipGrabber[i].setUsername(cam->username);
-        ipGrabber[i].setPassword(cam->password);
-        URI uri(cam->uri);
+        IPCameraDef& cam = getRandomCamera();
+        ipGrabber[i].setUsername(cam.username);
+        ipGrabber[i].setPassword(cam.password);
+        URI uri(cam.uri);
         ipGrabber[i].setURI(uri);
         ipGrabber[i].connect();
         // set up the listener!
         ofAddListener(ipGrabber[i].videoResized, this, &testApp::videoResized);
     }
-    
-
 }
 
 //--------------------------------------------------------------
-IPCameraDef* testApp::getRandomCamera() {
+IPCameraDef& testApp::getRandomCamera() {
 //    int i = (int)ofRandom(0, ipcams.size());
     int i = rs->next();
-    return &ipcams[i];
+    return ipcams[i];
 }
 
 //--------------------------------------------------------------
@@ -44,7 +38,6 @@ void testApp::loadCameras() {
 
     ipcams.push_back(IPCameraDef("http://148.61.142.228/axis-cgi/mjpg/video.cgi?resolution=320x240"));
     ipcams.push_back(IPCameraDef("http://82.79.176.85:8081/axis-cgi/mjpg/video.cgi?resolution=320x240"));
-    ipcams.push_back(IPCameraDef("http://iomaui.com:8001/axis-cgi/mjpg/video.cgi?resolution=320x240"));
     ipcams.push_back(IPCameraDef("http://81.8.151.136:88/axis-cgi/mjpg/video.cgi?resolution=320x240"));
     ipcams.push_back(IPCameraDef("http://130.15.110.15/axis-cgi/mjpg/video.cgi?resolution=320x240"));
     ipcams.push_back(IPCameraDef("http://193.68.123.245/axis-cgi/mjpg/video.cgi?resolution=320x240"));
@@ -55,13 +48,10 @@ void testApp::loadCameras() {
     ipcams.push_back(IPCameraDef("http://130.191.227.248/axis-cgi/mjpg/video.cgi?resolution=320x240"));
     ipcams.push_back(IPCameraDef("http://kassertheatercam.montclair.edu/axis-cgi/mjpg/video.cgi?resolution=320x240"));
     ipcams.push_back(IPCameraDef("http://194.17.150.25/axis-cgi/mjpg/video.cgi?resolution=320x240"));
-    ipcams.push_back(IPCameraDef("http://147.134.38.233/axis-cgi/mjpg/video.cgi?resolution=320x240"));
-    ipcams.push_back(IPCameraDef("http://216.99.115.55/axis-cgi/mjpg/video.cgi?resolution=320x240"));
     ipcams.push_back(IPCameraDef("http://130.95.52.185/axis-cgi/mjpg/video.cgi?resolution=320x240"));
     ipcams.push_back(IPCameraDef("http://74.94.55.182/axis-cgi/mjpg/video.cgi?resolution=320x240"));
     ipcams.push_back(IPCameraDef("http://213.77.33.2:8080/axis-cgi/mjpg/video.cgi?resolution=320x240"));
     ipcams.push_back(IPCameraDef("http://129.89.28.32/axis-cgi/mjpg/video.cgi?resolution=320x240"));
-    ipcams.push_back(IPCameraDef("http://212.219.113.227/axis-cgi/mjpg/video.cgi?resolution=320x240"));
     ipcams.push_back(IPCameraDef("http://129.171.176.150/axis-cgi/mjpg/video.cgi?resolution=320x240"));
     ipcams.push_back(IPCameraDef("http://134.29.208.43/mjpg/video.mjpg?resolution=320x240"));
     ipcams.push_back(IPCameraDef("http://134.29.208.43/mjpg/video.mjpg?resolution=320x240"));
@@ -123,7 +113,6 @@ void testApp::draw(){
 
         
         row = (row + 1) % NUM_ROWS;
-        
         if(row == 0) {
             col = (col + 1) % NUM_COLS;
         }
@@ -140,10 +129,10 @@ void testApp::draw(){
         ofSetColor(0,0,0,127);
         ofRect(10,h-45,w-20,35);
         
-        float kbps = ipGrabber[i].getBps() / 1000.0;
+        float kbps = ipGrabber[i].getBitRate() / (8 * 1000.0);
         totalKBPS+=kbps;
         
-        float fps = ipGrabber[i].getFps();
+        float fps = ipGrabber[i].getFrameRate();
         totalFPS+=fps;
         
         ofSetColor(255,255,255);
@@ -174,14 +163,15 @@ void testApp::draw(){
 void testApp::keyPressed  (int key){
     if(key == ' ') {
      
+        rs->reset();
         // initialize connection
         for(int i = 0; i < NUM_CAMERAS; i++) {
             ipGrabber[i].waitForDisconnect();
             // we may need to wait a sec here
-            IPCameraDef* cam = getRandomCamera();
-            ipGrabber[i].setUsername(cam->username);
-            ipGrabber[i].setPassword(cam->password);
-            URI uri(cam->uri);
+            IPCameraDef& cam = getRandomCamera();
+            ipGrabber[i].setUsername(cam.username);
+            ipGrabber[i].setPassword(cam.password);
+            URI uri(cam.uri);
             ipGrabber[i].setURI(uri);
             ipGrabber[i].connect();
         }

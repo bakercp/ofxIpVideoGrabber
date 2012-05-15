@@ -89,7 +89,7 @@ class testApp : public ofBaseApp{
 		ofxIpVideoGrabber	ipGrabber[NUM_CAMERAS]; // our four cameras
         
         void loadCameras();
-        IPCameraDef* getRandomCamera();
+        IPCameraDef& getRandomCamera();
         vector<IPCameraDef> ipcams; // a list of IPCameras
         
         RandomSampler* rs;
