@@ -55,7 +55,6 @@ void testApp::loadCameras() {
     ipcams.push_back(IPCameraDef("http://129.171.176.150/axis-cgi/mjpg/video.cgi?resolution=320x240"));
     ipcams.push_back(IPCameraDef("http://134.29.208.43/mjpg/video.mjpg?resolution=320x240"));
     ipcams.push_back(IPCameraDef("http://134.29.208.43/mjpg/video.mjpg?resolution=320x240"));
-    ipcams.push_back(IPCameraDef("http://webcam.magic.iac.es/axis-cgi/mjpg/video.cgi?resolution=320x240"));
     
 }
 
