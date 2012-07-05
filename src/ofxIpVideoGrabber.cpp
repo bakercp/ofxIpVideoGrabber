@@ -42,14 +42,15 @@ ofxIpVideoGrabber::ofxIpVideoGrabber() : ofBaseVideoDraws(), ofThread() {
     bIsConnected = false;
     ci = 0; // current index
     // prepare the buffer
-    image[0] = ofImage();
-    image[0].setUseTexture(false); 
-    image[1] = ofImage();
-    image[1].setUseTexture(false);  // we cannot use textures b/c loading data
+    image[0] = ofPtr<ofImage>(new ofImage());
+    image[0]->setUseTexture(false); 
+    image[1] = ofPtr<ofImage>(new ofImage());
+    image[1]->setUseTexture(false);  // we cannot use textures b/c loading data
                                     // happens in another thread an opengl  
                                     // requires a single thread.
 
-    img.allocate(1,1, OF_IMAGE_COLOR); // allocate something so it won't throw errors
+    img = ofPtr<ofImage>(new ofImage());
+    img->allocate(1,1, OF_IMAGE_COLOR); // allocate something so it won't throw errors
     
     isBackBufferReady = false;
     isNewFrameLoaded  = false;
@@ -230,7 +231,7 @@ void ofxIpVideoGrabber::threadedFunction(){
                     {
                         // there is a jpeg in the buffer
                         // get the back image (ci^1)
-                        image[ci^1].loadImage(buffer); 
+                        image[ci^1]->loadImage(buffer); 
                         isBackBufferReady = true;
                     }
                     unlock();
@@ -279,32 +280,37 @@ bool ofxIpVideoGrabber::isFrameNew() {
 
 //--------------------------------------------------------------
 unsigned char * ofxIpVideoGrabber::getPixels() {
-    return img.getPixels();
+    return img->getPixels();
 }
 
 //--------------------------------------------------------------
 ofPixelsRef ofxIpVideoGrabber::getPixelsRef() {
-    return img.getPixelsRef();
+    return img->getPixelsRef();
+}
+
+//--------------------------------------------------------------
+ofPtr<ofImage> ofxIpVideoGrabber::getFrame() {
+    return img;
 }
 
 //--------------------------------------------------------------
 ofTexture & ofxIpVideoGrabber::getTextureReference() {
-    return img.getTextureReference();
+    return img->getTextureReference();
 }
 
 //--------------------------------------------------------------
 void ofxIpVideoGrabber::setUseTexture(bool bUseTex) {
-    img.setUseTexture(bUseTex);
+    img->setUseTexture(bUseTex);
 }
 
 //--------------------------------------------------------------
 float ofxIpVideoGrabber::getWidth() {
-    return img.getWidth();
+    return img->getWidth();
 }
 
 //--------------------------------------------------------------
 float ofxIpVideoGrabber::getHeight() {
-    return img.getHeight();
+    return img->getHeight();
 }
 
 //--------------------------------------------------------------
@@ -321,10 +327,10 @@ void ofxIpVideoGrabber::update() {
         {
             ci^=1; // switch buffers (ci^1) was just filled in the thread
             
-            int newW = image[ci].getWidth();    // new buffer
-            int newH = image[ci].getHeight();   // new buffer
-            int oldW = image[ci^1].getWidth();  // old buffer
-            int oldH = image[ci^1].getHeight(); // old buffer
+            int newW = image[ci]->getWidth();    // new buffer
+            int newH = image[ci]->getHeight();   // new buffer
+            int oldW = image[ci^1]->getWidth();  // old buffer
+            int oldH = image[ci^1]->getHeight(); // old buffer
             
             // send out an alert to anyone who cares.
             // on occasion an mjpeg image stream size can be changed on the fly 
@@ -332,7 +338,8 @@ void ofxIpVideoGrabber::update() {
             if(newW != oldW || newH != oldH) imageResized(newW, newH);
             
             // get a pixel ref for the image that was just loaded in the thread
-            img.setFromPixels(image[ci].getPixelsRef());
+            img = ofPtr<ofImage>(new ofImage());
+            img->setFromPixels(image[ci]->getPixelsRef());
             
             isNewFrameLoaded = true;
         }
@@ -345,12 +352,12 @@ void ofxIpVideoGrabber::update() {
 
 //--------------------------------------------------------------
 void ofxIpVideoGrabber::draw(float x, float y){
-    img.draw(x,y);
+    img->draw(x,y);
 }
 
 //--------------------------------------------------------------
 void ofxIpVideoGrabber::draw(float x, float y, float width, float height) {
-    img.draw(x,y,width,height);
+    img->draw(x,y,width,height);
 }
 
 //--------------------------------------------------------------
@@ -365,17 +372,17 @@ void ofxIpVideoGrabber::draw(const ofRectangle & rect){
 
 //--------------------------------------------------------------
 void ofxIpVideoGrabber::setAnchorPercent(float xPct, float yPct) {
-    img.setAnchorPercent(xPct,yPct);
+    img->setAnchorPercent(xPct,yPct);
 }
 
 //--------------------------------------------------------------
 void ofxIpVideoGrabber::setAnchorPoint(float x, float y) {
-    img.setAnchorPoint(x,y);
+    img->setAnchorPoint(x,y);
 }
 
 //--------------------------------------------------------------
 void ofxIpVideoGrabber::resetAnchor() {
-    img.resetAnchor();
+    img->resetAnchor();
 }
 
 

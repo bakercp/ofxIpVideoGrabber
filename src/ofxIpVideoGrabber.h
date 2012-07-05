@@ -88,6 +88,8 @@ public:
 	unsigned char * getPixels();
 	ofPixelsRef getPixelsRef();
     
+    ofPtr<ofImage> getFrame();
+    
     // ofBaseHasTexture
     ofTexture & getTextureReference();
 	void setUseTexture(bool bUseTex);
@@ -148,8 +150,8 @@ private:
 
     
     int ci; // current image index
-    ofImage image[2]; // image double buffer.  this flips
-    ofImage img;
+    ofPtr<ofImage> image[2]; // image double buffer.  this flips
+    ofPtr<ofImage> img;
     bool isNewFrameLoaded;       // is there a new frame ready to be uploaded to glspace
     bool isBackBufferReady;
     
