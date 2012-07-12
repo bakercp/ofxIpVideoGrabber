@@ -203,6 +203,7 @@ void ofxIpVideoGrabber::threadedFunction(){
 
                         if(icompare(string("content-length"), key) == 0) {
                             contentLength = ofToInt(value);
+                            // TODO: we don't currently use content length, but could
                         } else if(icompare(string("content-type"), key) == 0) {
                             boundaryType = value;
                         } else {
