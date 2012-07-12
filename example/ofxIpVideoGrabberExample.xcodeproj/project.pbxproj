@@ -81,6 +81,7 @@
 		E4EB6923138AFD0F00A09F29 /* Project.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Project.xcconfig; sourceTree = "<group>"; };
 		FD480EF8155F01DC00660A6F /* ofxIpVideoGrabber.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ofxIpVideoGrabber.cpp; path = ../src/ofxIpVideoGrabber.cpp; sourceTree = "<group>"; };
 		FD480EF9155F01DC00660A6F /* ofxIpVideoGrabber.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ofxIpVideoGrabber.h; path = ../src/ofxIpVideoGrabber.h; sourceTree = "<group>"; };
+		FDD5B5EF15AE7DB30071E55E /* ofxRandomSampler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxRandomSampler.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -111,6 +112,7 @@
 		BB4B014C10F69532006C3DED /* addons */ = {
 			isa = PBXGroup;
 			children = (
+				FDD5B5E815AE7DB30071E55E /* ofxUtils */,
 				FD480EF5155F01CD00660A6F /* ofxIpVideoGrabber */,
 			);
 			name = addons;
@@ -207,6 +209,23 @@
 				FD480EF9155F01DC00660A6F /* ofxIpVideoGrabber.h */,
 			);
 			name = src;
+			sourceTree = "<group>";
+		};
+		FDD5B5E815AE7DB30071E55E /* ofxUtils */ = {
+			isa = PBXGroup;
+			children = (
+				FDD5B5EB15AE7DB30071E55E /* src */,
+			);
+			name = ofxUtils;
+			path = ../../ofxUtils;
+			sourceTree = "<group>";
+		};
+		FDD5B5EB15AE7DB30071E55E /* src */ = {
+			isa = PBXGroup;
+			children = (
+				FDD5B5EF15AE7DB30071E55E /* ofxRandomSampler.h */,
+			);
+			path = src;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

@@ -6,7 +6,7 @@ bool locked = false;
 void testApp::setup(){
     ofSetFrameRate(30);
     loadCameras();
-    rs = new RandomSampler(ipcams.size());    
+    rs = new ofxRandomSampler(ipcams.size());    
     // initialize connection
     for(int i = 0; i < NUM_CAMERAS; i++) {
         IPCameraDef& cam = getRandomCamera();
