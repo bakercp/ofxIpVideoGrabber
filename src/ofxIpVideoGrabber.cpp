@@ -260,6 +260,7 @@ void ofxIpVideoGrabber::threadedFunction(){
     }
     
     delete[] cBuf;
+    cBuf = NULL;
 
     // we may have already aborted the connection. but double check
     if(session.connected()) {
