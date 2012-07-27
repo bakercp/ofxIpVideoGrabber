@@ -1,4 +1,4 @@
-ofxIpVideoGrabber
+xIpVideoGrabber
 ==================
 
 Copyright (c) 2011, 2012 Christopher Baker <http://christopherbaker.net>
@@ -35,3 +35,16 @@ The addon should sit in `openFrameworks/addons/ofxIpVideoGrabber/`.
 #### Which version to use?
 
 ofxIpVideoGrabber has been tested with the latest development version of Open Frameworks.
+
+Compatability
+-------------
+
+Edimax IC-3005
+Axis Cameras
+and others.
+
+Alternatives
+------------
+
+If you are interested in using these cameras with Processing or Max/MSP/Jitter, you can find code here: https://github.com/themaw/mawLib/tree/master/src/mxj/trunk/mawLib-mxj/src/maw/jit/ipcam.  It is part of mawLib and includes pan/tilt, etc control code.
+
