@@ -1,4 +1,4 @@
-xIpVideoGrabber
+ofxIpVideoGrabber
 ==================
 
 Copyright (c) 2011, 2012 Christopher Baker <http://christopherbaker.net>
