@@ -27,6 +27,7 @@
 
 #define MODE_HEADER 0
 #define MODE_JPEG   1
+#define MINIMUM_JPEG_SIZE 134 // minimum number of bytes for a valid jpeg
 
 // jpeg starting and ending bytes
 #define JFF static_cast<char> (0xFF)
@@ -228,16 +229,19 @@ void ofxIpVideoGrabber::threadedFunction(){
                     mode = MODE_JPEG;
                 } else if(cBuf[c] == EOI ) {
                     buffer = ofBuffer(cBuf, c+1);
-                    lock(); 
-                    {
-                        // there is a jpeg in the buffer
-                        // get the back image (ci^1)
-                        image[ci^1]->loadImage(buffer); 
-                        isBackBufferReady = true;
+                    if( c >= MINIMUM_JPEG_SIZE) { // some cameras send 2+ EOIs in a row, with no valid bytes in between
+                        lock(); 
+                        {
+                            // there is a jpeg in the buffer
+                            // get the back image (ci^1)
+                            image[ci^1]->loadImage(buffer); 
+                            isBackBufferReady = true;
+                        }
+                        unlock();
+                        nFrames++; // incrase frame cout
+                    } else {
+                        ofLogVerbose("ofxIpVideoGrabber: received EOI, but number of bytes was less than MINIMUM_JPEG_SIZE.  Resetting."); 
                     }
-                    unlock();
-                    nFrames++; // incrase frame cout
-                    
                     mode = MODE_HEADER;
                     resetBuffer = true;
                 } else {}
