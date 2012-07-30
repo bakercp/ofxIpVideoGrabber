@@ -38,9 +38,9 @@
 
 //--------------------------------------------------------------
 ofxIpVideoGrabber::ofxIpVideoGrabber() : ofBaseVideoDraws(), ofThread() {
-
     
-    bIsConnected = false;
+    connectionState = DISCONNECTED;
+    
     ci = 0; // current index
     // prepare the buffer
     image[0] = ofPtr<ofImage>(new ofImage());
@@ -55,20 +55,18 @@ ofxIpVideoGrabber::ofxIpVideoGrabber() : ofBaseVideoDraws(), ofThread() {
     
     isBackBufferReady = false;
     isNewFrameLoaded  = false;
-    
-    ofAddListener(ofEvents().exit, this, &ofxIpVideoGrabber::exit); // for cleanup
 }
 
 //--------------------------------------------------------------
 ofxIpVideoGrabber::~ofxIpVideoGrabber() {
-    stopThread();
+    waitForDisconnect();
     // magic ofPtr takes care of image cleanup.
 }
 
 
 //--------------------------------------------------------------
 void ofxIpVideoGrabber::connect() {
-    if(!bIsConnected) {
+    if(isDisconnected()) {
         resetStats();
         startThread(true, false);   // blocking, verbose
     } else {
@@ -78,10 +76,10 @@ void ofxIpVideoGrabber::connect() {
 
 //--------------------------------------------------------------
 void ofxIpVideoGrabber::waitForDisconnect() {
-    if(bIsConnected) {
+    if(!isDisconnected()) {
         resetStats();
         if(session.connected()) {
-            session.reset(); // close the session httpclient
+            session.reset(); // close the session httpclient, this might cause an exception to be thrown
         }
         waitForThread(true); // close it all down (politely)
     } else {
@@ -91,7 +89,7 @@ void ofxIpVideoGrabber::waitForDisconnect() {
 
 //--------------------------------------------------------------
 void ofxIpVideoGrabber::disconnect() {
-    if(bIsConnected) {
+    if(isConnected()) {
         resetStats();
         if(session.connected()) {
             session.reset(); // close the session httpclient
@@ -109,12 +107,29 @@ void ofxIpVideoGrabber::close() {
 
 //--------------------------------------------------------------
 bool ofxIpVideoGrabber::isConnected() const {
-    return bIsConnected;
+    return connectionState == CONNECTED;
+}
+
+//--------------------------------------------------------------
+bool ofxIpVideoGrabber::isDisconnected() const {
+    return connectionState == DISCONNECTED;
+}
+
+//--------------------------------------------------------------
+bool ofxIpVideoGrabber::isConnecting() const {
+    return connectionState == CONNECTING;
+}
+
+//--------------------------------------------------------------
+bool ofxIpVideoGrabber::isDisconnecting() const {
+    return connectionState == DISCONNECTING;
 }
 
 //--------------------------------------------------------------
 void ofxIpVideoGrabber::threadedFunction(){
 
+    connectionState = CONNECTING;
+    
     try {
         session.setHost(uri.getHost());
         session.setPort(uri.getPort());
@@ -134,6 +149,7 @@ void ofxIpVideoGrabber::threadedFunction(){
     } catch (Poco::Exception& exc) {
         ofLog(OF_LOG_ERROR,"ofxIpVideoGrabber: [" + getURI() +"]:" + exc.displayText());
         session.reset();
+        connectionState = DISCONNECTED;
         return;
     }
     
@@ -146,6 +162,7 @@ void ofxIpVideoGrabber::threadedFunction(){
     } catch (Poco::Net::NoMessageException& e) {
         ofLog(OF_LOG_ERROR,"ofxIpVideoGrabber: [" + getURI() +"] : " + e.displayText());
         session.reset();
+        connectionState = DISCONNECTED;
         return;
     }
 
@@ -155,10 +172,11 @@ void ofxIpVideoGrabber::threadedFunction(){
         string reason = res.getReasonForStatus(status);
         ofLog(OF_LOG_ERROR, "ofxIpVideoGrabber: Error connecting! [" + getURI() +"]: " + reason + " (" + ofToString(status) + ")");
         session.reset();
+        connectionState = DISCONNECTED;
         return;
     }
     
-    bIsConnected = true;  // we are now connected
+    connectionState = CONNECTED;
     
     vector<string> param = ofSplitString(res.getContentType(),";", true); // split it (try)
     
@@ -271,13 +289,9 @@ void ofxIpVideoGrabber::threadedFunction(){
     if(session.connected()) {
         session.reset(); // close the session httpclient
     }
-    bIsConnected = false;
-
-}
-
-//--------------------------------------------------------------
-void ofxIpVideoGrabber::exit(ofEventArgs & a) {
-    waitForDisconnect();
+    
+    connectionState = DISCONNECTED;
+    
 }
 
 //--------------------------------------------------------------
@@ -328,7 +342,7 @@ void ofxIpVideoGrabber::update(ofEventArgs & a) {
 //--------------------------------------------------------------
 void ofxIpVideoGrabber::update() {
     // do opengl texture loading from the main update thread
-    if(bIsConnected && isBackBufferReady) {
+    if(isConnected() && isBackBufferReady) {
         
         lock();  // lock down the thread!
         {
@@ -395,7 +409,7 @@ void ofxIpVideoGrabber::resetAnchor() {
 
 //--------------------------------------------------------------
 float ofxIpVideoGrabber::getFrameRate() {
-    if(!bIsConnected) return 0;
+    if(!isConnected()) return 0;
     if(t0 == 0) t0 = ofGetSystemTime(); // start time
     elapsedTime = (int)(ofGetSystemTime() - t0);
     return float(nFrames) / (elapsedTime / (1000.0f));
@@ -403,7 +417,7 @@ float ofxIpVideoGrabber::getFrameRate() {
     
 //--------------------------------------------------------------
 float ofxIpVideoGrabber::getBitRate() {
-    if(!bIsConnected) return 0;
+    if(!isConnected()) return 0;
     if(t0 == 0) t0 = ofGetSystemTime(); // start time
     elapsedTime = (int)(ofGetSystemTime() - t0);
     return 8 * float(nBytes) / (elapsedTime / (1000.0f)); // bits per second

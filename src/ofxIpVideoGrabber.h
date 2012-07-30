@@ -67,6 +67,14 @@ using Poco::trimRightInPlace;
 
 using Poco::icompare;
 
+enum ConnectionState {
+  DISCONNECTED,
+  CONNECTING,
+  CONNECTED,
+  DISCONNECTING
+};
+
+
 class ofxIpVideoGrabber : public ofBaseVideoDraws, protected ofThread {
 public:
     ofxIpVideoGrabber();
@@ -75,7 +83,6 @@ public:
     void update();
     
     void update(ofEventArgs & a);
-    void exit(ofEventArgs & a);
 
     void connect();
     void disconnect();
@@ -148,6 +155,9 @@ public:
     HTTPClientSession* getSession();
     
     bool isConnected() const;
+    bool isDisconnected() const;
+    bool isConnecting() const;
+    bool isDisconnecting() const;
     
     ofEvent<ofResizeEventArgs> 	videoResized;
     
@@ -179,7 +189,8 @@ private:
     URI     uri;
     HTTPBasicCredentials credentials;
     
-    bool bIsConnected;
+    ConnectionState connectionState;
+    
     
     HTTPClientSession session;
 
