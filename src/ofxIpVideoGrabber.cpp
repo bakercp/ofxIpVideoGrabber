@@ -62,6 +62,7 @@ ofxIpVideoGrabber::ofxIpVideoGrabber() : ofBaseVideoDraws(), ofThread() {
 //--------------------------------------------------------------
 ofxIpVideoGrabber::~ofxIpVideoGrabber() {
     stopThread();
+    // magic ofPtr takes care of image cleanup.
 }
 
 
@@ -107,7 +108,7 @@ void ofxIpVideoGrabber::close() {
 }
 
 //--------------------------------------------------------------
-bool ofxIpVideoGrabber::isConnected() {
+bool ofxIpVideoGrabber::isConnected() const {
     return bIsConnected;
 }
 
@@ -126,6 +127,7 @@ void ofxIpVideoGrabber::threadedFunction(){
 
         HTTPRequest req(HTTPRequest::HTTP_GET, path, HTTPMessage::HTTP_1_1);
         credentials.authenticate(req); // autheticate
+        req.setCookies(cookies);
 
         session.sendRequest(req);
 
@@ -134,7 +136,6 @@ void ofxIpVideoGrabber::threadedFunction(){
         session.reset();
         return;
     }
-
     
     HTTPResponse res;
     istream* rs;
@@ -409,54 +410,90 @@ float ofxIpVideoGrabber::getBitRate() {
 }
 
 //--------------------------------------------------------------
-void ofxIpVideoGrabber::setUsername(string username) {
+void ofxIpVideoGrabber::setCookie(const string& key, const string& value) {
+    cookies.add(key, value);
+}
+
+void ofxIpVideoGrabber::eraseCookie(const string& key) {
+    cookies.erase(key);
+}
+
+string ofxIpVideoGrabber::getCookie(const string& key) const {
+    return cookies.get(key);
+}
+
+//--------------------------------------------------------------
+void ofxIpVideoGrabber::setUsername(const string& username) {
     credentials.setUsername(username); // autheticate
 }
 
 //--------------------------------------------------------------
-void ofxIpVideoGrabber::setPassword(string password) {
+void ofxIpVideoGrabber::setPassword(const string& password) {
     credentials.setPassword(password); // autheticate
 }
 
 //--------------------------------------------------------------
-string ofxIpVideoGrabber::getUsername() {
+string ofxIpVideoGrabber::getUsername() const {
     return credentials.getUsername();
 }
 
 //--------------------------------------------------------------
-string ofxIpVideoGrabber::getPassword() {
+string ofxIpVideoGrabber::getPassword() const {
     return credentials.getPassword();
 }
 
 //--------------------------------------------------------------
-string ofxIpVideoGrabber::getURI() {
+string ofxIpVideoGrabber::getURI() const {
     return uri.toString();
 }
 
+//--------------------------------------------------------------
+string ofxIpVideoGrabber::getHost() const {
+    return uri.getHost();
+}
 
 //--------------------------------------------------------------
-void ofxIpVideoGrabber::setURI(string _uri) {
+string ofxIpVideoGrabber::getQuery() const {
+    return uri.getQuery();
+}
+
+//--------------------------------------------------------------
+int ofxIpVideoGrabber::getPort() const {
+    return (int)uri.getPort();
+}
+
+//--------------------------------------------------------------
+string ofxIpVideoGrabber::getFragment() const {
+    return uri.getFragment();
+}
+
+URI ofxIpVideoGrabber::getPocoURI() const {
+    return uri;
+}
+
+//--------------------------------------------------------------
+void ofxIpVideoGrabber::setURI(const string& _uri) {
     URI uri(_uri);
     setURI(uri);
 }
 
 //--------------------------------------------------------------
-void ofxIpVideoGrabber::setURI(URI _uri) {
+void ofxIpVideoGrabber::setURI(const URI& _uri) {
     uri = _uri;
 }
 
 //--------------------------------------------------------------
-void ofxIpVideoGrabber::setProxyUsername(string username) {
+void ofxIpVideoGrabber::setProxyUsername(const string& username) {
     session.setProxyUsername(username);
 }
 
 //--------------------------------------------------------------
-void ofxIpVideoGrabber::setProxyPassword(string password) {
+void ofxIpVideoGrabber::setProxyPassword(const string& password) {
     session.setProxyPassword(password);
 }
 
 //--------------------------------------------------------------
-void ofxIpVideoGrabber::setProxyHost(string host) {
+void ofxIpVideoGrabber::setProxyHost(const string& host) {
     session.setProxyHost(host);
 }
 
@@ -466,22 +503,22 @@ void ofxIpVideoGrabber::setProxyPort(int port) {
 }
 
 //--------------------------------------------------------------
-string ofxIpVideoGrabber::getProxyUsername() {
+string ofxIpVideoGrabber::getProxyUsername() const {
     return getProxyUsername();
 }
 
 //--------------------------------------------------------------
-string ofxIpVideoGrabber::getProxyPassword() {
+string ofxIpVideoGrabber::getProxyPassword() const {
     return getProxyPassword();
 }
 
 //--------------------------------------------------------------
-string ofxIpVideoGrabber::getProxyHost() {
+string ofxIpVideoGrabber::getProxyHost() const {
     return getProxyHost();
 }
 
 //--------------------------------------------------------------
-int ofxIpVideoGrabber::getProxyPort() {
+int ofxIpVideoGrabber::getProxyPort() const {
     return getProxyPort();
 }
 

@@ -2,11 +2,55 @@
 
 #include "ofMain.h"
 #include "ofxIpVideoGrabber.h"
-#include "ofxRandomSampler.h"
 
-#define NUM_CAMERAS 16
-#define NUM_ROWS 4
-#define NUM_COLS 4
+#define NUM_CAMERAS 9
+#define NUM_ROWS 3
+#define NUM_COLS 3
+
+class ofxRandomSampler {
+public:
+    ofxRandomSampler(int n) {
+        size = n;
+        vals = new int[size];
+        reset();
+    }
+    
+    virtual ~ofxRandomSampler() {
+        delete[] vals;
+    }
+    
+    void reset() {
+    	for(int i=0;i<size;++i) {
+			vals[i] = i;
+		}
+        
+		// shuffle the elements in the array
+        // Fisher-Yates shuffle
+		for (int i=size;i>0;--i) {
+            // 			int rand = cast(int) (drand48() * n);
+			int rnd = (int)ofRandom(0, i);
+			assert(rnd >=0 && rnd < i);
+			swap(vals[i-1], vals[rnd]);
+		}
+		counter = 0;
+    }
+    
+    int next() {
+		if (counter==size) {
+            reset(); // re-init
+			return next();
+		} else {
+			return vals[counter++];
+		}
+    }
+    
+private:
+    
+    int counter;
+    int size;
+    int* vals;
+};
+
 
 class IPCameraDef {
 public:
@@ -49,8 +93,8 @@ class testApp : public ofBaseApp{
         IPCameraDef& getRandomCamera();
         vector<IPCameraDef> ipcams; // a list of IPCameras
         
-        ofxRandomSampler* rs;
-    
+        ofxRandomSampler* rs; // this is used so that we don't get repeats from our pool every time
+
         // This message occurs when the incoming video stream image size changes. 
         // This can happen if the IPCamera has a single broadcast state (some cheaper IPCams do this)
         // and that broadcast size is changed by another user. 

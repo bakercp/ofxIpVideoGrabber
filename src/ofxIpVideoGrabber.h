@@ -33,6 +33,7 @@
 #include "Poco/Net/NetException.h"
 #include "Poco/Net/HTTPRequest.h"
 #include "Poco/Net/HTTPResponse.h"
+#include "Poco/Net/HTTPCookie.h"
 #include "Poco/StreamCopier.h"
 #include "Poco/Path.h"
 #include "Poco/URI.h"
@@ -111,32 +112,42 @@ public:
     float getBitRate();
     
     // set video URI
-    void setURI(string uri);
-    void setURI(URI uri);
+    void setURI(const string& uri);
+    void setURI(const URI& uri);
 
-    string getURI();
+    string getURI() const;
+    URI getPocoURI() const;
     
+    string getHost() const;
+    string getQuery() const;
+    int getPort() const;
+    string getFragment() const;
+    
+    void setCookie(const string& key, const string& value);
+    void eraseCookie(const string& key);
+    string getCookie(const string& key) const;
+
     // basic authentication
-    void setUsername(string username);
-    void setPassword(string password);
+    void setUsername(const string& username);
+    void setPassword(const string& password);
     
-    string getUsername();
-    string getPassword();
+    string getUsername() const;
+    string getPassword() const;
     
     // proxy server
-    void setProxyUsername(string username);
-    void setProxyPassword(string password);
-    void setProxyHost(string host);
+    void setProxyUsername(const string& username);
+    void setProxyPassword(const string& password);
+    void setProxyHost(const string& host);
     void setProxyPort(int port);
 
-    string getProxyUsername();
-    string getProxyPassword();
-    string getProxyHost();
-    int    getProxyPort();
+    string getProxyUsername() const;
+    string getProxyPassword() const;
+    string getProxyHost() const;
+    int    getProxyPort() const;
     
     HTTPClientSession* getSession();
     
-    bool isConnected();
+    bool isConnected() const;
     
     ofEvent<ofResizeEventArgs> 	videoResized;
     
@@ -171,5 +182,7 @@ private:
     bool bIsConnected;
     
     HTTPClientSession session;
+
+    NameValueCollection cookies;
     
 };
