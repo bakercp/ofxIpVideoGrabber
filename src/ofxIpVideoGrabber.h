@@ -118,6 +118,9 @@ public:
     float getFrameRate();
     float getBitRate();
     
+    void setName(const string& name);
+    string getName();
+    
     // set video URI
     void setURI(const string& uri);
     void setURI(const URI& uri);
@@ -169,6 +172,7 @@ protected:
     
 private: 
 
+    string name;
     
     int ci; // current image index
     ofPtr<ofImage> image[2]; // image double buffer.  this flips

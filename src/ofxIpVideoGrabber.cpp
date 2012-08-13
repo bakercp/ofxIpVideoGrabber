@@ -55,6 +55,8 @@ ofxIpVideoGrabber::ofxIpVideoGrabber() : ofBaseVideoDraws(), ofThread() {
     
     isBackBufferReady = false;
     isNewFrameLoaded  = false;
+    
+    name = "DEFAULT";
 }
 
 //--------------------------------------------------------------
@@ -421,6 +423,16 @@ float ofxIpVideoGrabber::getBitRate() {
     if(t0 == 0) t0 = ofGetSystemTime(); // start time
     elapsedTime = (int)(ofGetSystemTime() - t0);
     return 8 * float(nBytes) / (elapsedTime / (1000.0f)); // bits per second
+}
+
+//--------------------------------------------------------------
+void ofxIpVideoGrabber::setName(const string& _name) {
+    name = _name;
+}
+
+//--------------------------------------------------------------
+string ofxIpVideoGrabber::getName() {
+    return name;
 }
 
 //--------------------------------------------------------------
