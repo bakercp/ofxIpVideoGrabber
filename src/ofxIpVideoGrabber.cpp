@@ -422,7 +422,7 @@ float ofxIpVideoGrabber::getBitRate() {
     if(!isConnected()) return 0;
     if(t0 == 0) t0 = ofGetSystemTime(); // start time
     elapsedTime = (int)(ofGetSystemTime() - t0);
-    return 8 * float(nBytes) / (elapsedTime / (1000.0f)); // bits per second
+    return (float(nBytes) / 8.0f) / (elapsedTime / (1000.0f)); // bits per second
 }
 
 //--------------------------------------------------------------
