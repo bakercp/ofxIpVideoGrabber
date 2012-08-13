@@ -101,7 +101,7 @@ void testApp::draw(){
     int w = 320;
     int h = 240;
     
-    float totalKBPS = 0;
+    float totalKbps = 0;
     float totalFPS = 0;
     
     for(int i = 0; i < NUM_CAMERAS; i++) {
@@ -126,8 +126,8 @@ void testApp::draw(){
         ofSetColor(0,0,0,127);
         ofRect(5,h-47,w-10,42);
         
-        float kbps = ipGrabber[i].getBitRate() / (8 * 1000.0);
-        totalKBPS+=kbps;
+        float kbps = ipGrabber[i].getBitRate() / 1000.0f; // kilobits / second, not kibibits / second
+        totalKbps+=kbps;
         
         float fps = ipGrabber[i].getFrameRate();
         totalFPS+=fps;
@@ -136,7 +136,7 @@ void testApp::draw(){
         ofSetColor(255);
         ofDrawBitmapString("HOST: " + ipGrabber[i].getHost(), 10, h-34);
         ofDrawBitmapString(" FPS: " + ofToString(fps, 2,7,' '), 10, h-22);
-        ofDrawBitmapString("KB/S: " + ofToString(kbps, 2,7,' '), 10, h-10);
+        ofDrawBitmapString("Kb/S: " + ofToString(kbps, 2,7,' '), 10, h-10);
         
         ofDisableAlphaBlending();
         
@@ -145,7 +145,7 @@ void testApp::draw(){
     
     // keep track of some totals
     float avgFPS = totalFPS / NUM_CAMERAS;
-    float avgKBPS = totalKBPS / NUM_CAMERAS;
+    float avgKbps = totalKbps / NUM_CAMERAS;
 
     ofEnableAlphaBlending();
     ofSetColor(0,80);
@@ -153,8 +153,8 @@ void testApp::draw(){
     
     ofSetColor(255);
     ofDrawBitmapString(" AVG FPS: " + ofToString(avgFPS,2,7,' '), 10,17);
-    ofDrawBitmapString("AVG KB/S: " + ofToString(avgKBPS,2,7,' '), 10,29);
-    ofDrawBitmapString("TOT KB/S: " + ofToString(totalKBPS,2,7,' '), 10,41);
+    ofDrawBitmapString("AVG Kb/S: " + ofToString(avgKbps,2,7,' '), 10,29);
+    ofDrawBitmapString("TOT Kb/S: " + ofToString(totalKbps,2,7,' '), 10,41);
     ofDisableAlphaBlending();
 
 }
