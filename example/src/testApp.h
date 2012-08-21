@@ -4,9 +4,9 @@
 #include "ofxXmlSettings.h"
 #include "ofxIpVideoGrabber.h"
 
-#define NUM_CAMERAS 16
-#define NUM_ROWS 4
-#define NUM_COLS 4
+#define NUM_CAMERAS 9
+#define NUM_ROWS 3
+#define NUM_COLS 3
 
 class IPCameraDef {
 public:
