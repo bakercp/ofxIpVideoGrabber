@@ -35,14 +35,7 @@
 #include "Poco/Token.h"
 #include "Poco/URI.h"
 
-enum ConnectionState {
-  DISCONNECTED,
-  CONNECTING,
-  CONNECTED,
-  DISCONNECTING
-};
 #include "Poco/Net/HTTPBasicCredentials.h"
-
 #include "Poco/Net/HTTPClientSession.h"
 #include "Poco/Net/HTTPCookie.h"
 #include "Poco/Net/HTTPRequest.h"
@@ -74,6 +67,7 @@ public:
 	bool isFrameNew();
 	void close();
     
+    void reset();
 
     // ofBaseHasPixels
 	unsigned char * getPixels();
@@ -98,6 +92,9 @@ public:
     float getWidth();
     float getHeight();
     
+    unsigned long getNumFramesReceived(); // not const b/c we access a mutex
+    unsigned long getNumBytesReceived();  // not const b/c we access a mutex
+
     float getFrameRate();
     float getBitRate();
     
@@ -130,22 +127,36 @@ public:
     string getPassword() const;
     
     // proxy server
+    
+    
+    void setUseProxy(bool useProxy);
     void setProxyUsername(const string& username);
     void setProxyPassword(const string& password);
     void setProxyHost(const string& host);
-    void setProxyPort(int port);
+    void setProxyPort(UInt16 port);
 
+    bool   getUseProxy() const;
     string getProxyUsername() const;
     string getProxyPassword() const;
     string getProxyHost() const;
-    int    getProxyPort() const;
+    UInt16 getProxyPort() const;
     
-    HTTPClientSession* getSession();
+    HTTPClientSession& getSessionRef();
     
-    bool isConnected() const;
-    bool isDisconnected() const;
-    bool isConnecting() const;
-    bool isDisconnecting() const;
+    bool isConnected();
+    
+    bool hasConnectionFailed() const;
+    
+    void setReconnectTimeout(unsigned long ms);
+    unsigned long getReconnectTimeout() const; // ms
+    bool getNeedsReconnect() const;
+    bool getAutoReconnect() const;
+    unsigned long getReconnectCount() const;
+    unsigned long getMaxReconnects() const;
+    void setMaxReconnects(unsigned long num);
+
+    void setDefaultBoundaryMarker(const string& boundarMarker);
+    string getDefaultBoundaryMarker();
     
     ofEvent<ofResizeEventArgs> 	videoResized;
     
@@ -153,37 +164,67 @@ protected:
     
     void threadedFunction(); // connect to server
     void imageResized(int width, int height);
-    void resetStats();
     
     
 private: 
 
-    string name;
+    string defaultBoundaryMarker;
+    
+    string cameraName;
+
+    // credentials
+    string username;
+    string password;
+    
+    bool   bUseProxy;
+    string proxyUsername;
+    string proxyPassword;
+    string proxyHost;
+    UInt16 proxyPort;
+    
+    ofPixels pix;
     
     int ci; // current image index
-    ofPtr<ofImage> image[2]; // image double buffer.  this flips
+    ofImage image[2]; // image double buffer.  this flips
     ofPtr<ofImage> img;
+    
     bool isNewFrameLoaded;       // is there a new frame ready to be uploaded to glspace
     bool isBackBufferReady;
     
-    unsigned long t0; // init time
-    unsigned long elapsedTime;
+    unsigned long connectTime_a; // init time
+    unsigned long elapsedTime_a;
     
-    unsigned long nBytes;
-    unsigned long lastByteTime;
-    float bps; // bytes / second
+    unsigned long nBytes_a;
+    unsigned long nFrames_a;
     
-    unsigned long nFrames;
-    unsigned long lastFrameTime;
+    unsigned long nBytesReceived;
+    unsigned long nFramesReceived;
+        
+    float currentBitRate;
+    float currentFrameRate;
     
-    URI     uri;
-    HTTPBasicCredentials credentials;
+    float minBitrate; // the minimum acceptable bitrate before reconnecting
+    unsigned long lastValidBitrateTime; // the time of the last valid bitrate (will wait for reconnectTime time)
+    unsigned long reconnectTimeout; // ms the amount ot time we will wait to reach the min bitrate
     
-    ConnectionState connectionState;
     
-    
-    HTTPClientSession session;
+    unsigned long retryDelay; // retry delay in ms
+    unsigned long nextRetry;
+    bool connectionFailure; // max reconnects exceeded, is dead.
+    bool needsReconnect; // needs reconnecting
+    bool autoReconnect;  // shoudl automatically reconnect
+    unsigned long reconnectCount; // the number of reconnects attempted
+    unsigned long maxReconnects;  // the maximum number of reconnect attempts that will be made
 
-    NameValueCollection cookies;
     
+    unsigned long sessionTimeout; // ms
+    URI uri;
+    
+    NameValueCollection cookies;
+  
+    Condition condition;
+
 };
+
+typedef ofPtr< ofxIpVideoGrabber > ofxSharedIpVideoGrabber;
+
