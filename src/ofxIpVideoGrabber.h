@@ -101,8 +101,8 @@ public:
     float getFrameRate();
     float getBitRate();
     
-    void setName(const string& name);
-    string getName();
+    string getCameraName() const;
+    void setCameraName(const string& cameraName);
     
     // set video URI
     void setURI(const string& uri);

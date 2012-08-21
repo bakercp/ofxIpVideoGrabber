@@ -55,8 +55,8 @@ ofxIpVideoGrabber::ofxIpVideoGrabber() : ofBaseVideoDraws(), ofThread() {
     
     isBackBufferReady = false;
     isNewFrameLoaded  = false;
+    cameraName = "";
     
-    name = "DEFAULT";
     // THIS IS EXTREMELY IMPORTANT.
     // To shut down the thread cleanly, we cannot allow openFrameworks to de-init FreeImage
     // before this thread has completed any current image loads.  Thus we need to make sure
@@ -449,13 +449,17 @@ float ofxIpVideoGrabber::getBitRate() {
 }
 
 //--------------------------------------------------------------
-void ofxIpVideoGrabber::setName(const string& _name) {
-    name = _name;
+void ofxIpVideoGrabber::setCameraName(const string& _cameraName) {
+    cameraName = _cameraName;
 }
 
 //--------------------------------------------------------------
-string ofxIpVideoGrabber::getName() {
-    return name;
+string ofxIpVideoGrabber::getCameraName() const {
+    if(cameraName.empty()) {
+        return getURI();
+    } else {
+        return cameraName;
+    }
 }
 
 //--------------------------------------------------------------
