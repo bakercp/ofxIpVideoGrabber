@@ -210,24 +210,20 @@ void testApp::draw(){
         totalFPS+=fps;
         
         
-        string aR = "NO"; if(ipGrabber[i]->getAutoReconnect()) aR = "YES";
-        string nC = "NO"; if(ipGrabber[i]->getNeedsReconnect()) nC = "YES";
-        string fail = "NO"; if(ipGrabber[i]->hasConnectionFailed()) fail = "YES";
-        
-        
         stringstream ss;
         
-        ss << "          NAME: " + ipGrabber[i]->getCameraName() << endl;
-        ss << "          HOST: " + ipGrabber[i]->getHost() << endl;
-        ss << "           FPS: " + ofToString(fps,  2,13,' ') << endl;
-        ss << "          Kb/S: " + ofToString(kbps, 2,13,' ') << endl;
-        ss << " #Bytes Recv'd: " + ofToString(ipGrabber[i]->getNumBytesReceived(),  0,10,' ') << endl;
-        ss << "#Frames Recv'd: " + ofToString(ipGrabber[i]->getNumFramesReceived(), 0,10,' ') << endl;
-        ss << "Auto Reconnect: " + aR << endl;
-        ss << " Needs Connect: " + nC << endl;
-        ss << "Num Reconnects: " + ofToString(ipGrabber[i]->getReconnectCount()) << endl;
-        ss << "Max Reconnects: " + ofToString(ipGrabber[i]->getMaxReconnects()) << endl;
-        ss << "  Connect Fail: " + fail;
+        ss << "          NAME: " << ipGrabber[i]->getCameraName() << endl;
+        ss << "          HOST: " << ipGrabber[i]->getHost() << endl;
+        ss << "           FPS: " << ofToString(fps,  2,13,' ') << endl;
+        ss << "          Kb/S: " << ofToString(kbps, 2,13,' ') << endl;
+        ss << " #Bytes Recv'd: " << ofToString(ipGrabber[i]->getNumBytesReceived(),  0,10,' ') << endl;
+        ss << "#Frames Recv'd: " << ofToString(ipGrabber[i]->getNumFramesReceived(), 0,10,' ') << endl;
+        ss << "Auto Reconnect: " << (ipGrabber[i]->getAutoReconnect() ? "YES" : "NO") << endl;
+        ss << " Needs Connect: " << (ipGrabber[i]->getNeedsReconnect() ? "YES" : "NO") << endl;
+        ss << "Time Till Next: " << ipGrabber[i]->getTimeTillNextAutoRetry() << " ms" << endl;
+        ss << "Num Reconnects: " << ofToString(ipGrabber[i]->getReconnectCount()) << endl;
+        ss << "Max Reconnects: " << ofToString(ipGrabber[i]->getMaxReconnects()) << endl;
+        ss << "  Connect Fail: " << (ipGrabber[i]->hasConnectionFailed() ? "YES" : "NO");
 
         ofSetColor(255);
         ofDrawBitmapString(ss.str(), 10, 10+12);

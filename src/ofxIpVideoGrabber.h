@@ -49,7 +49,7 @@
 using namespace Poco;
 using namespace Poco::Net;
 
-typedef Poco::FastMutex::ScopedLock ofxScopedLock;
+typedef Poco::FastMutex::ScopedLock ofScopedLock;
 
 class ofxIpVideoGrabber : public ofBaseVideoDraws, protected ofThread {
 public:
@@ -162,7 +162,8 @@ public:
     void setMaxReconnects(unsigned long num);
     unsigned long getAutoRetryDelay();
     void setAutoRetryDelay(unsigned long delay_ms);
-    unsigned long getNextAutoRetry();
+    unsigned long getNextAutoRetryTime();
+    unsigned long getTimeTillNextAutoRetry();
 
     void setDefaultBoundaryMarker(const string& boundarMarker);
     string getDefaultBoundaryMarker() ;
