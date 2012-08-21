@@ -32,6 +32,7 @@
 #include "Poco/Path.h"
 #include "Poco/StreamTokenizer.h"
 #include "Poco/StreamCopier.h"
+#include "Poco/ScopedLock.h"
 #include "Poco/Token.h"
 #include "Poco/URI.h"
 
@@ -48,8 +49,13 @@
 using namespace Poco;
 using namespace Poco::Net;
 
+typedef Poco::FastMutex::ScopedLock ofxScopedLock;
+
 class ofxIpVideoGrabber : public ofBaseVideoDraws, protected ofThread {
 public:
+    
+    Poco::FastMutex myMutex;
+    
     ofxIpVideoGrabber();
     virtual ~ofxIpVideoGrabber();
     
@@ -98,33 +104,33 @@ public:
     float getFrameRate();
     float getBitRate();
     
-    string getCameraName() const;
+    string getCameraName();
     void setCameraName(const string& cameraName);
     
     // set video URI
     void setURI(const string& uri);
     void setURI(const URI& uri);
 
-    string getURI() const;
-    URI getPocoURI() const;
+    string getURI();
+    URI getPocoURI();
     
     // poco uri access
-    string getHost() const;
-    string getQuery() const;
-    int getPort() const;
-    string getFragment() const;
+    string getHost();
+    string getQuery();
+    int getPort();
+    string getFragment();
     
     // cookies
     void setCookie(const string& key, const string& value);
     void eraseCookie(const string& key);
-    string getCookie(const string& key) const;
+    string getCookie(const string& key);
 
     // basic authentication
     void setUsername(const string& username);
     void setPassword(const string& password);
     
-    string getUsername() const;
-    string getPassword() const;
+    string getUsername();
+    string getPassword();
     
     // proxy server
     
@@ -135,11 +141,11 @@ public:
     void setProxyHost(const string& host);
     void setProxyPort(UInt16 port);
 
-    bool   getUseProxy() const;
-    string getProxyUsername() const;
-    string getProxyPassword() const;
-    string getProxyHost() const;
-    UInt16 getProxyPort() const;
+    bool   getUseProxy();
+    string getProxyUsername();
+    string getProxyPassword();
+    string getProxyHost();
+    UInt16 getProxyPort();
     
     HTTPClientSession& getSessionRef();
     
@@ -156,7 +162,7 @@ public:
     void setMaxReconnects(unsigned long num);
 
     void setDefaultBoundaryMarker(const string& boundarMarker);
-    string getDefaultBoundaryMarker();
+    string getDefaultBoundaryMarker() ;
     
     ofEvent<ofResizeEventArgs> 	videoResized;
     
@@ -168,28 +174,28 @@ protected:
     
 private: 
 
-    string defaultBoundaryMarker;
+    string defaultBoundaryMarker_a;
     
-    string cameraName;
+    string cameraName_a;
 
     // credentials
-    string username;
-    string password;
+    string username_a;
+    string password_a;
     
-    bool   bUseProxy;
-    string proxyUsername;
-    string proxyPassword;
-    string proxyHost;
-    UInt16 proxyPort;
+    bool   bUseProxy_a;
+    string proxyUsername_a;
+    string proxyPassword_a;
+    string proxyHost_a;
+    UInt16 proxyPort_a;
     
-    ofPixels pix;
+    //ofPixels pix;
     
     int ci; // current image index
-    ofImage image[2]; // image double buffer.  this flips
+    ofImage image_a[2]; // image double buffer.  this flips
     ofPtr<ofImage> img;
     
     bool isNewFrameLoaded;       // is there a new frame ready to be uploaded to glspace
-    bool isBackBufferReady;
+    bool isBackBufferReady_a;
     
     unsigned long connectTime_a; // init time
     unsigned long elapsedTime_a;
@@ -218,12 +224,10 @@ private:
 
     
     unsigned long sessionTimeout; // ms
-    URI uri;
+    URI uri_a;
     
     NameValueCollection cookies;
   
-    Condition condition;
-
 };
 
 typedef ofPtr< ofxIpVideoGrabber > ofxSharedIpVideoGrabber;
