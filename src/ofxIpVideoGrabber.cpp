@@ -170,7 +170,17 @@ void ofxIpVideoGrabber::update() {
             // send out an alert to anyone who cares.
             // on occasion an mjpeg image stream size can be changed on the fly
             // without our knowledge.  so tell people about it.
+            
+            // remove lock for a moment to send out the message
+            // we must remove the lock, so any calls made to THIS object
+            // within the callback will be able to get their locks via
+            // synchronized methods.
+            mutex.unlock();
+            
             if(newW != oldW || newH != oldH) imageResized(newW, newH);
+            
+            // lock it again.
+            mutex.lock();
             
             // get a pixel ref for the image that was just loaded in the thread
             
