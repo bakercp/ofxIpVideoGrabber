@@ -57,12 +57,35 @@ ofxIpVideoGrabber::ofxIpVideoGrabber() : ofBaseVideoDraws(), ofThread() {
     isNewFrameLoaded  = false;
     
     name = "DEFAULT";
+    // THIS IS EXTREMELY IMPORTANT.
+    // To shut down the thread cleanly, we cannot allow openFrameworks to de-init FreeImage
+    // before this thread has completed any current image loads.  Thus we need to make sure
+    // that this->waitForDisconnect() is called before the main oF loop calls
+    // ofImage::ofCloseFreeImage().  This can often result in slight lags during shutdown,
+    // especially when multiple threads are running, but it prevents crashes.
+    // To do that, we simply need to register an ofEvents.exit listener.
+    // Alternatively, each thread could instantiate its own instance of FreeImage, but that
+    // seems memory inefficient.  Thus, the shutdown lag for now.
+
+    ofAddListener(ofEvents().exit,this,&ofxIpVideoGrabber::exit);
 }
 
 //--------------------------------------------------------------
 ofxIpVideoGrabber::~ofxIpVideoGrabber() {
+    // N.B. In most cases, ofxIpVideoGrabber::exit() will be called before
+    // the program ever makes it into this destructor, but in some cases we
+    waitForDisconnect(); //
+    
+    // it is ok to unregister an item that is not currently registered
+    // POCO's internal loop won't complain or return errors
+    // POCO stores the delegates in a std::vector and iterates through
+    // deleting and returning on match, and doing nothing on a no-match condition
+    ofRemoveListener(ofEvents().exit,this,&ofxIpVideoGrabber::exit);
+}
+
+void ofxIpVideoGrabber::exit(ofEventArgs & a) {
     waitForDisconnect();
-    // magic ofPtr takes care of image cleanup.
+    ofRemoveListener(ofEvents().exit,this,&ofxIpVideoGrabber::exit);
 }
 
 

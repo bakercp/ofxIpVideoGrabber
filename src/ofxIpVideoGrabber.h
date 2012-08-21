@@ -80,6 +80,8 @@ public:
     ofxIpVideoGrabber();
     virtual ~ofxIpVideoGrabber();
     
+    void exit(ofEventArgs & a);
+
     void update();
     
     void update(ofEventArgs & a);
