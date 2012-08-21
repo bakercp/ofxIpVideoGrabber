@@ -25,6 +25,12 @@
 		E4C2424910CC5A17004149E2 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E4C2424610CC5A17004149E2 /* IOKit.framework */; };
 		E4EB6799138ADC1D00A09F29 /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BBAB23BE13894E4700AA2426 /* GLUT.framework */; };
 		FD480EFA155F01DC00660A6F /* ofxIpVideoGrabber.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FD480EF8155F01DC00660A6F /* ofxIpVideoGrabber.cpp */; };
+		FD674CB515DDE6D70004F20C /* tinyxml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FD674CAE15DDE6D70004F20C /* tinyxml.cpp */; };
+		FD674CB615DDE6D70004F20C /* tinyxmlerror.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FD674CB015DDE6D70004F20C /* tinyxmlerror.cpp */; };
+		FD674CB715DDE6D70004F20C /* tinyxmlparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FD674CB115DDE6D70004F20C /* tinyxmlparser.cpp */; };
+		FD674CB815DDE6D70004F20C /* ofxXmlSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FD674CB315DDE6D70004F20C /* ofxXmlSettings.cpp */; };
+		FDA5D5F315E309D800853D6E /* QTKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA5D5F215E309D800853D6E /* QTKit.framework */; };
+		FDA5D5FB15E30A1F00853D6E /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA5D5FA15E30A1F00853D6E /* QuartzCore.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -71,7 +77,7 @@
 		E45BE97A0E8CC7DD009D7055 /* QuickTime.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickTime.framework; path = /System/Library/Frameworks/QuickTime.framework; sourceTree = "<absolute>"; };
 		E4B69B5B0A3A1756003C02F2 /* ofxIpVideoGrabberExampleDebug.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ofxIpVideoGrabberExampleDebug.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E4B69E1D0A3A1BDC003C02F2 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = src/main.cpp; sourceTree = SOURCE_ROOT; };
-		E4B69E1E0A3A1BDC003C02F2 /* testApp.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = testApp.cpp; path = src/testApp.cpp; sourceTree = SOURCE_ROOT; };
+		E4B69E1E0A3A1BDC003C02F2 /* testApp.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = testApp.cpp; path = src/testApp.cpp; sourceTree = SOURCE_ROOT; };
 		E4B69E1F0A3A1BDC003C02F2 /* testApp.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = testApp.h; path = src/testApp.h; sourceTree = SOURCE_ROOT; };
 		E4B6FCAD0C3E899E008CF71C /* openFrameworks-Info.plist */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.plist.xml; path = "openFrameworks-Info.plist"; sourceTree = "<group>"; };
 		E4C2424410CC5A17004149E2 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
@@ -81,6 +87,14 @@
 		E4EB6923138AFD0F00A09F29 /* Project.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Project.xcconfig; sourceTree = "<group>"; };
 		FD480EF8155F01DC00660A6F /* ofxIpVideoGrabber.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ofxIpVideoGrabber.cpp; path = ../src/ofxIpVideoGrabber.cpp; sourceTree = "<group>"; };
 		FD480EF9155F01DC00660A6F /* ofxIpVideoGrabber.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ofxIpVideoGrabber.h; path = ../src/ofxIpVideoGrabber.h; sourceTree = "<group>"; };
+		FD674CAE15DDE6D70004F20C /* tinyxml.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tinyxml.cpp; sourceTree = "<group>"; };
+		FD674CAF15DDE6D70004F20C /* tinyxml.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tinyxml.h; sourceTree = "<group>"; };
+		FD674CB015DDE6D70004F20C /* tinyxmlerror.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tinyxmlerror.cpp; sourceTree = "<group>"; };
+		FD674CB115DDE6D70004F20C /* tinyxmlparser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tinyxmlparser.cpp; sourceTree = "<group>"; };
+		FD674CB315DDE6D70004F20C /* ofxXmlSettings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxXmlSettings.cpp; sourceTree = "<group>"; };
+		FD674CB415DDE6D70004F20C /* ofxXmlSettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxXmlSettings.h; sourceTree = "<group>"; };
+		FDA5D5F215E309D800853D6E /* QTKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QTKit.framework; path = ../../../../../../../../../System/Library/Frameworks/QTKit.framework; sourceTree = "<group>"; };
+		FDA5D5FA15E30A1F00853D6E /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = ../../../../../../../../../System/Library/Frameworks/QuartzCore.framework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -102,6 +116,8 @@
 				E4C2424710CC5A17004149E2 /* AppKit.framework in Frameworks */,
 				E4C2424810CC5A17004149E2 /* Cocoa.framework in Frameworks */,
 				E4C2424910CC5A17004149E2 /* IOKit.framework in Frameworks */,
+				FDA5D5F315E309D800853D6E /* QTKit.framework in Frameworks */,
+				FDA5D5FB15E30A1F00853D6E /* QuartzCore.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -111,6 +127,7 @@
 		BB4B014C10F69532006C3DED /* addons */ = {
 			isa = PBXGroup;
 			children = (
+				FD674CAC15DDE6D70004F20C /* ofxXmlSettings */,
 				FD480EF5155F01CD00660A6F /* ofxIpVideoGrabber */,
 			);
 			name = addons;
@@ -119,6 +136,8 @@
 		BBAB23C913894ECA00AA2426 /* system frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				FDA5D5FA15E30A1F00853D6E /* QuartzCore.framework */,
+				FDA5D5F215E309D800853D6E /* QTKit.framework */,
 				E4C2424410CC5A17004149E2 /* AppKit.framework */,
 				E4C2424510CC5A17004149E2 /* Cocoa.framework */,
 				E4C2424610CC5A17004149E2 /* IOKit.framework */,
@@ -209,6 +228,36 @@
 			name = src;
 			sourceTree = "<group>";
 		};
+		FD674CAC15DDE6D70004F20C /* ofxXmlSettings */ = {
+			isa = PBXGroup;
+			children = (
+				FD674CAD15DDE6D70004F20C /* libs */,
+				FD674CB215DDE6D70004F20C /* src */,
+			);
+			name = ofxXmlSettings;
+			path = ../../../addons/ofxXmlSettings;
+			sourceTree = "<group>";
+		};
+		FD674CAD15DDE6D70004F20C /* libs */ = {
+			isa = PBXGroup;
+			children = (
+				FD674CAE15DDE6D70004F20C /* tinyxml.cpp */,
+				FD674CAF15DDE6D70004F20C /* tinyxml.h */,
+				FD674CB015DDE6D70004F20C /* tinyxmlerror.cpp */,
+				FD674CB115DDE6D70004F20C /* tinyxmlparser.cpp */,
+			);
+			path = libs;
+			sourceTree = "<group>";
+		};
+		FD674CB215DDE6D70004F20C /* src */ = {
+			isa = PBXGroup;
+			children = (
+				FD674CB315DDE6D70004F20C /* ofxXmlSettings.cpp */,
+				FD674CB415DDE6D70004F20C /* ofxXmlSettings.h */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -296,6 +345,10 @@
 				E4B69E200A3A1BDC003C02F2 /* main.cpp in Sources */,
 				E4B69E210A3A1BDC003C02F2 /* testApp.cpp in Sources */,
 				FD480EFA155F01DC00660A6F /* ofxIpVideoGrabber.cpp in Sources */,
+				FD674CB515DDE6D70004F20C /* tinyxml.cpp in Sources */,
+				FD674CB615DDE6D70004F20C /* tinyxmlerror.cpp in Sources */,
+				FD674CB715DDE6D70004F20C /* tinyxmlparser.cpp in Sources */,
+				FD674CB815DDE6D70004F20C /* ofxXmlSettings.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

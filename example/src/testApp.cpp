@@ -1,36 +1,89 @@
 #include "testApp.h"
 
+
+/*
+inurl:”ViewerFrame?Mode=
+intitle:Axis 2400 video server
+inurl:/view.shtml
+intitle:”Live View / – AXIS | inurl:view/view.shtml^
+inurl:ViewerFrame?Mode=
+inurl:ViewerFrame?Mode=Refresh
+inurl:axis-cgi/jpg
+inurl:axis-cgi/mjpg (motion-JPEG)
+inurl:view/indexFrame.shtml
+inurl:view/index.shtml
+inurl:view/view.shtml
+liveapplet
+intitle:”live view” intitle:axis
+intitle:liveapplet
+allintitle:”Network Camera NetworkCamera”
+intitle:axis intitle:”video server”
+intitle:liveapplet inurl:LvAppl
+intitle:”EvoCam” inurl:”webcam.html”
+intitle:”Live NetSnap Cam-Server feed”
+intitle:”Live View / – AXIS”
+intitle:”Live View / – AXIS 206M”
+intitle:”Live View / – AXIS 206W”
+intitle:”Live View / – AXIS 210?
+inurl:indexFrame.shtml Axis
+inurl:”MultiCameraFrame?Mode=Motion”
+intitle:start inurl:cgistart
+intitle:”WJ-NT104 Main Page”
+intext:”MOBOTIX M1? intext:”Open Menu”
+intext:”MOBOTIX M10? intext:”Open Menu”
+intext:”MOBOTIX D10? intext:”Open Menu”
+intitle:snc-z20 inurl:home/
+intitle:snc-cs3 inurl:home/
+intitle:snc-rz30 inurl:home/
+intitle:”sony network camera snc-p1?
+intitle:”sony network camera snc-m1?
+site:.viewnetcam.com -www.viewnetcam.com
+intitle:”Toshiba Network Camera” user login
+intitle:”netcam live image”
+intitle:”i-Catcher Console – Web Monitor”
+*/
+
 bool locked = false;
 
 //--------------------------------------------------------------
 void testApp::setup(){
+    ofSetLogLevel(OF_LOG_VERBOSE);
     ofSetFrameRate(30);
     loadCameras();
-    rs = new ofxRandomSampler(ipcams.size());    
+
+    
     // initialize connection
     for(int i = 0; i < NUM_CAMERAS; i++) {
-        IPCameraDef& cam = getRandomCamera();
+        IPCameraDef& cam = getNextCamera();
         
+        ofxSharedIpVideoGrabber c( new ofxIpVideoGrabber());
+
         // if your camera uses standard web-based authentication, use this
-        ipGrabber[i].setUsername(cam.username);
-        ipGrabber[i].setPassword(cam.password);
+        // c->setUsername(cam.username);
+        // c->setPassword(cam.password);
         
         // if your camera uses cookies for authentication, use something like this:
         // ipGrabber[i].setCookie("user", cam.username);
         // ipGrabber[i].setCookie("password", cam.password);
         
-        URI uri(cam.uri);
-        ipGrabber[i].setURI(uri);
-        ipGrabber[i].connect();
-        // set up the listener!
-        ofAddListener(ipGrabber[i].videoResized, this, &testApp::videoResized);
+        c->setCameraName(cam.name);
+        c->setURI(cam.url);
+        c->connect(); // connect immediately
+
+        // if desired, set up a video resize listener
+        ofAddListener(c->videoResized, this, &testApp::videoResized);
+        
+        ipGrabber.push_back(c);
+
     }
 }
 
 //--------------------------------------------------------------
-IPCameraDef& testApp::getRandomCamera() {
-    return ipcams[rs->next()]; // get the next camera, sampling w/o replacement
+IPCameraDef& testApp::getNextCamera() {
+    nextCamera = (nextCamera + 1) % ipcams.size();
+    return ipcams[nextCamera];
 }
+
 
 //--------------------------------------------------------------
 void testApp::loadCameras() {
@@ -42,47 +95,71 @@ void testApp::loadCameras() {
     // to define a camera with a username / password
     //ipcams.push_back(IPCameraDef("http://148.61.142.228/axis-cgi/mjpg/video.cgi", "username", "password"));
 
-    ipcams.push_back(IPCameraDef("http://148.61.142.228/axis-cgi/mjpg/video.cgi?resolution=320x240"));
-    ipcams.push_back(IPCameraDef("http://82.79.176.85:8081/axis-cgi/mjpg/video.cgi?resolution=320x240"));
-    ipcams.push_back(IPCameraDef("http://81.8.151.136:88/axis-cgi/mjpg/video.cgi?resolution=320x240"));
-    ipcams.push_back(IPCameraDef("http://130.15.110.15/axis-cgi/mjpg/video.cgi?resolution=320x240"));
-    ipcams.push_back(IPCameraDef("http://80.34.88.249/axis-cgi/mjpg/video.cgi?resolution=320x240"));
-    ipcams.push_back(IPCameraDef("http://216.8.159.21/axis-cgi/mjpg/video.cgi?resolution=320x240"));
-    ipcams.push_back(IPCameraDef("http://kassertheatercam.montclair.edu/axis-cgi/mjpg/video.cgi?resolution=320x240"));
-    ipcams.push_back(IPCameraDef("http://74.94.55.182/axis-cgi/mjpg/video.cgi?resolution=320x240"));
-    ipcams.push_back(IPCameraDef("http://213.77.33.2:8080/axis-cgi/mjpg/video.cgi?resolution=320x240"));
-    ipcams.push_back(IPCameraDef("http://129.89.28.32/axis-cgi/mjpg/video.cgi?resolution=320x240"));
-    ipcams.push_back(IPCameraDef("http://129.171.176.150/axis-cgi/mjpg/video.cgi?resolution=320x240"));
-    ipcams.push_back(IPCameraDef("http://134.29.208.43/mjpg/video.mjpg?resolution=320x240"));
-    ipcams.push_back(IPCameraDef("http://134.29.208.43/mjpg/video.mjpg?resolution=320x240"));
+	ofLog(OF_LOG_NOTICE, "---------------Loading Streams---------------");
+
+	ofxXmlSettings XML;
     
+	if( XML.loadFile("streams.xml") ){
+
+        XML.pushTag("streams");
+		string tag = "stream";
+		
+		int nCams = XML.getNumTags(tag);
+		
+		for(int n = 0; n < nCams; n++) {
+            
+            IPCameraDef def;
+
+			def.name = XML.getAttribute(tag, "name", "", n);
+			def.url = XML.getAttribute(tag, "url", "", n);
+			def.username = XML.getAttribute(tag, "username", "", n);
+			def.password = XML.getAttribute(tag, "password", "", n);
+			
+			string logMessage = "STREAM LOADED: " + def.name +
+			" url: " +  def.url +
+			" username: " + def.username +
+			" password: " + def.password;
+            
+            ofLog(OF_LOG_NOTICE, logMessage);
+            
+            ipcams.push_back(def);
+            
+		}
+		
+		XML.popTag();
+		
+        
+		
+	} else {
+		ofLog(OF_LOG_ERROR, "Unable to load streams.xml.");
+	}
+	ofLog(OF_LOG_NOTICE, "-----------Loading Streams Complete----------");
+    
+    
+    nextCamera = ipcams.size();
 }
 
 
 //--------------------------------------------------------------
 void testApp::videoResized(const void * sender, ofResizeEventArgs& arg) {
-
-    ofLog(OF_LOG_VERBOSE, "testApp::videoResized: A camera was resized.");
-
     // find the camera that sent the resize event changed
     for(int i = 0; i < NUM_CAMERAS; i++) {
         if(sender == &ipGrabber[i]) {
             stringstream ss;
-            ss << "testApp::videoResized: ";
-            ss << "Camera connected to: " << ipGrabber[i].getURI() + " ";
+            ss << "videoResized: ";
+            ss << "Camera connected to: " << ipGrabber[i]->getURI() + " ";
             ss << "New DIM = " << arg.width << "/" << arg.height;
-            ofLog(OF_LOG_VERBOSE, ss.str());
+            ofLogVerbose("testApp") << ss.str();
         }
     }
-    ofLog(OF_LOG_VERBOSE, "Unable to locate the camera.  Very odd.");
 }
 
 
 //--------------------------------------------------------------
 void testApp::update(){
     // update the cameras
-    for(int i = 0; i < NUM_CAMERAS; i++) {
-        ipGrabber[i].update();
+    for(size_t i = 0; i < ipGrabber.size(); i++) {
+        ipGrabber[i]->update();
     }
 }
 
@@ -98,13 +175,13 @@ void testApp::draw(){
     int x = 0;
     int y = 0;
     
-    int w = 320;
-    int h = 240;
+    int w = ofGetWidth() / NUM_COLS;
+    int h = ofGetHeight() / NUM_ROWS;
     
     float totalKbps = 0;
     float totalFPS = 0;
     
-    for(int i = 0; i < NUM_CAMERAS; i++) {
+    for(size_t i = 0; i < ipGrabber.size(); i++) {
         x = col * w;
         y = row * h;
 
@@ -118,25 +195,43 @@ void testApp::draw(){
         ofPushMatrix();
         ofTranslate(x,y);
         ofSetColor(255,255,255,255);
-        ipGrabber[i].draw(0,0,w,h); // draw the camera
+        ipGrabber[i]->draw(0,0,w,h); // draw the camera
         
         ofEnableAlphaBlending();
         
         // draw the info box
-        ofSetColor(0,0,0,127);
-        ofRect(5,h-47,w-10,42);
+        ofSetColor(0,80);
+        ofRect(5,5,w-10,h-10);
         
-        float kbps = ipGrabber[i].getBitRate() / 1000.0f; // kilobits / second, not kibibits / second
+        float kbps = ipGrabber[i]->getBitRate() / 1000.0f; // kilobits / second, not kibibits / second
         totalKbps+=kbps;
         
-        float fps = ipGrabber[i].getFrameRate();
+        float fps = ipGrabber[i]->getFrameRate();
         totalFPS+=fps;
         
         
+        string aR = "NO"; if(ipGrabber[i]->getAutoReconnect()) aR = "YES";
+        string nC = "NO"; if(ipGrabber[i]->getNeedsReconnect()) nC = "YES";
+        string fail = "NO"; if(ipGrabber[i]->hasConnectionFailed()) fail = "YES";
+        
+        
+        stringstream ss;
+        
+        ss << "          NAME: " + ipGrabber[i]->getCameraName() << endl;
+        ss << "          HOST: " + ipGrabber[i]->getHost() << endl;
+        ss << "           FPS: " + ofToString(fps,  2,13,' ') << endl;
+        ss << "          Kb/S: " + ofToString(kbps, 2,13,' ') << endl;
+        ss << " #Bytes Recv'd: " + ofToString(ipGrabber[i]->getNumBytesReceived(),  0,10,' ') << endl;
+        ss << "#Frames Recv'd: " + ofToString(ipGrabber[i]->getNumFramesReceived(), 0,10,' ') << endl;
+        ss << "Auto Reconnect: " + aR << endl;
+        ss << " Needs Connect: " + nC << endl;
+        ss << "Num Reconnects: " + ofToString(ipGrabber[i]->getReconnectCount()) << endl;
+        ss << "Max Reconnects: " + ofToString(ipGrabber[i]->getMaxReconnects()) << endl;
+        ss << "  Connect Fail: " + fail;
+
         ofSetColor(255);
-        ofDrawBitmapString("HOST: " + ipGrabber[i].getHost(), 10, h-34);
-        ofDrawBitmapString(" FPS: " + ofToString(fps, 2,7,' '), 10, h-22);
-        ofDrawBitmapString("Kb/S: " + ofToString(kbps, 2,7,' '), 10, h-10);
+        ofDrawBitmapString(ss.str(), 10, 10+12);
+        
         
         ofDisableAlphaBlending();
         
@@ -162,18 +257,19 @@ void testApp::draw(){
 //--------------------------------------------------------------
 void testApp::keyPressed  (int key){
     if(key == ' ') {
-     
-        rs->reset();
         // initialize connection
         for(int i = 0; i < NUM_CAMERAS; i++) {
-            ipGrabber[i].waitForDisconnect();
-            // we may need to wait a sec here
-            IPCameraDef& cam = getRandomCamera();
-            ipGrabber[i].setUsername(cam.username);
-            ipGrabber[i].setPassword(cam.password);
-            URI uri(cam.uri);
-            ipGrabber[i].setURI(uri);
-            ipGrabber[i].connect();
+            ofRemoveListener(ipGrabber[i]->videoResized, this, &testApp::videoResized);
+            ofxSharedIpVideoGrabber c( new ofxIpVideoGrabber());
+            IPCameraDef& cam = getNextCamera();
+            c->setUsername(cam.username);
+            c->setPassword(cam.password);
+            URI uri(cam.url);
+            c->setURI(uri);
+            c->connect();
+            
+            ipGrabber[i] = c;
+            
         }
     }
 }
