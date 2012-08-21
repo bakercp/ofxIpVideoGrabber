@@ -155,15 +155,18 @@ public:
     
     void setReconnectTimeout(unsigned long ms);
     unsigned long getReconnectTimeout() const; // ms
-    bool getNeedsReconnect() const;
+    bool getNeedsReconnect();
     bool getAutoReconnect() const;
-    unsigned long getReconnectCount() const;
+    unsigned long getReconnectCount();
     unsigned long getMaxReconnects() const;
     void setMaxReconnects(unsigned long num);
+    unsigned long getAutoRetryDelay();
+    void setAutoRetryDelay(unsigned long delay_ms);
+    unsigned long getNextAutoRetry();
 
     void setDefaultBoundaryMarker(const string& boundarMarker);
     string getDefaultBoundaryMarker() ;
-    
+        
     ofEvent<ofResizeEventArgs> 	videoResized;
     
 protected:
@@ -203,9 +206,6 @@ private:
     unsigned long nBytes_a;
     unsigned long nFrames_a;
     
-    unsigned long nBytesReceived;
-    unsigned long nFramesReceived;
-        
     float currentBitRate;
     float currentFrameRate;
     
@@ -214,12 +214,12 @@ private:
     unsigned long reconnectTimeout; // ms the amount ot time we will wait to reach the min bitrate
     
     
-    unsigned long retryDelay; // retry delay in ms
-    unsigned long nextRetry;
+    unsigned long autoRetryDelay_a; // retry delay in ms
+    unsigned long nextAutoRetry_a;
     bool connectionFailure; // max reconnects exceeded, is dead.
-    bool needsReconnect; // needs reconnecting
+    bool needsReconnect_a; // needs reconnecting
     bool autoReconnect;  // shoudl automatically reconnect
-    unsigned long reconnectCount; // the number of reconnects attempted
+    unsigned long reconnectCount_a; // the number of reconnects attempted
     unsigned long maxReconnects;  // the maximum number of reconnect attempts that will be made
 
     

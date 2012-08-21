@@ -22,9 +22,7 @@
 
  ==============================================================================*/
 
-
 #include "ofxIpVideoGrabber.h"
-
 
 enum ContentStreamMode {
     MODE_HEADER = 0,
@@ -69,28 +67,26 @@ ofxIpVideoGrabber::ofxIpVideoGrabber() : ofBaseVideoDraws(), ofThread() {
     
     currentBitRate   = 0.0;
     currentFrameRate = 0.0;
-    nBytesReceived   = 0;
-    nFramesReceived  = 0;
     
     connectTime_a = 0;
     elapsedTime_a = 0;
     nBytes_a      = 0;
     nFrames_a     = 0;
     
-    needsReconnect = false;
+    needsReconnect_a = false;
     // stats
     
     minBitrate = 8;
 
     connectionFailure = false;
-    needsReconnect = false;
+    needsReconnect_a = false;
     autoReconnect  = true;
     
-    reconnectCount = 0;
+    reconnectCount_a = 0;
     maxReconnects = 20;
     
-    retryDelay = 1000; // at least 1 second retry delay
-    nextRetry = 0;
+    autoRetryDelay_a = 1000; // at least 1 second retry delay
+    nextAutoRetry_a = 0;
 
     bUseProxy_a = false;
     proxyUsername_a = "";
@@ -154,7 +150,6 @@ void ofxIpVideoGrabber::update() {
     string cName = getCameraName(); // consequence of scoped locking
     
     if(isConnected()) {
-
         ///////////////////////////////
         mutex.lock();     // LOCKING //
         ///////////////////////////////
@@ -186,9 +181,6 @@ void ofxIpVideoGrabber::update() {
             isBackBufferReady_a = false;
         }
         
-        nBytesReceived = nBytes_a;
-        nFramesReceived = nFrames_a;
-        
         if(elapsedTime_a > 0) {
             currentFrameRate = ( float(nFrames_a) )       / (elapsedTime_a / (1000.0f)); // frames per second
             currentBitRate   = ( float(nBytes_a ) / 8.0f) / (elapsedTime_a / (1000.0f)); // bits per second
@@ -202,25 +194,25 @@ void ofxIpVideoGrabber::update() {
         } else {
             if((elapsedTime_a - lastValidBitrateTime) > reconnectTimeout) {
                 ofLogVerbose("ofxIpVideoGrabber") << "["<< cName << "] Disconnecting because of slow bitrate." << isConnected();
-                needsReconnect = true;
+                needsReconnect_a = true;
             } else {
                 // slowed below min bitrate, waiting to see if we are too low for long enought to merit a reconnect
             }
         }
-        
+    
         ///////////////////////////////
         mutex.unlock(); // UNLOCKING //
         ///////////////////////////////
-
-
     } else {
-        if(needsReconnect) {
-            if(reconnectCount < maxReconnects) {
-                if(now > nextRetry) {
-                    ofLogVerbose("ofxIpVideoGrabber") << "[" << cName << "] attempting reconnection " << reconnectCount << "/" << maxReconnects;
+        
+        if(getNeedsReconnect()) {
+            if(getReconnectCount() < maxReconnects) {
+                unsigned long nar = getNextAutoRetry();
+                if(now > getNextAutoRetry()) {
+                    ofLogVerbose("ofxIpVideoGrabber") << "[" << cName << "] attempting reconnection " << getReconnectCount() << "/" << maxReconnects;
                     connect();
                 } else {
-                    ofLogVerbose("ofxIpVideoGrabber") << "[" << cName << "] retry connect in " << (nextRetry - now) << " ms.";
+                    ofLogVerbose("ofxIpVideoGrabber") << "[" << cName << "] retry connect in " << (nar - now) << " ms.";
                 }
             } else {
                 if(!connectionFailure) {
@@ -230,6 +222,8 @@ void ofxIpVideoGrabber::update() {
             }
         }
     }
+    
+
 }
 
 //--------------------------------------------------------------
@@ -241,8 +235,6 @@ void ofxIpVideoGrabber::connect() {
         
         currentBitRate   = 0.0;
         currentFrameRate = 0.0;
-        nBytesReceived   = 0;
-        nFramesReceived  = 0;
 
         startThread(true, false);   // blocking, verbose
     } else {
@@ -273,8 +265,10 @@ void ofxIpVideoGrabber::close() {
 
 //--------------------------------------------------------------
 void ofxIpVideoGrabber::reset() {
-    reconnectCount = 0;
+    mutex.lock();
+    reconnectCount_a = 0;
     connectionFailure = false;
+    mutex.unlock();
     waitForDisconnect();
 }
 
@@ -294,8 +288,9 @@ unsigned long ofxIpVideoGrabber::getReconnectTimeout() const {
 }
 
 //--------------------------------------------------------------
-bool ofxIpVideoGrabber::getNeedsReconnect() const {
-    return needsReconnect;
+bool ofxIpVideoGrabber::getNeedsReconnect() {
+    ofxScopedLock lock(mutex);
+    return needsReconnect_a;
 }
 
 //--------------------------------------------------------------
@@ -304,8 +299,9 @@ bool ofxIpVideoGrabber::getAutoReconnect() const {
 }
 
 //--------------------------------------------------------------
-unsigned long ofxIpVideoGrabber::getReconnectCount() const {
-    return reconnectCount;
+unsigned long ofxIpVideoGrabber::getReconnectCount() {
+    ofxScopedLock lock(mutex);
+    return reconnectCount_a;
 }
 
 //--------------------------------------------------------------
@@ -317,6 +313,25 @@ unsigned long ofxIpVideoGrabber::getMaxReconnects() const {
 void ofxIpVideoGrabber::setMaxReconnects(unsigned long num) {
     maxReconnects = num;
 }
+
+//--------------------------------------------------------------
+unsigned long ofxIpVideoGrabber::getAutoRetryDelay() {
+    ofxScopedLock lock(mutex);
+    return autoRetryDelay_a;
+}
+
+//--------------------------------------------------------------
+void ofxIpVideoGrabber::setAutoRetryDelay(unsigned long delay_ms) {
+    ofxScopedLock lock(mutex);
+    autoRetryDelay_a = delay_ms;
+}
+
+//--------------------------------------------------------------
+unsigned long ofxIpVideoGrabber::getNextAutoRetry() {
+    ofxScopedLock lock(mutex);
+    return nextAutoRetry_a;
+}
+
 
 //--------------------------------------------------------------
 void ofxIpVideoGrabber::setDefaultBoundaryMarker(const string& _defaultBoundaryMarker) {
@@ -353,8 +368,8 @@ void ofxIpVideoGrabber::threadedFunction(){
     nBytes_a      = 0;
     nFrames_a     = 0;
     
-    needsReconnect = false;
-    reconnectCount++;
+    needsReconnect_a = false;
+    reconnectCount_a++;
 
     ///////////////////////
     // configure session //
@@ -549,8 +564,8 @@ void ofxIpVideoGrabber::threadedFunction(){
 
     } catch (Exception& e) {
         mutex.lock();
-        needsReconnect = true;
-        nextRetry = ofGetSystemTime() + retryDelay;
+        needsReconnect_a = true;
+        nextAutoRetry_a = ofGetSystemTime() + autoRetryDelay_a;
         mutex.unlock();
         ofLogError("ofxIpVideoGrabber") << "Exception : [" << getCameraName() << "]: " <<  e.displayText();
     }
@@ -609,7 +624,8 @@ float ofxIpVideoGrabber::getHeight() {
 //--------------------------------------------------------------
 unsigned long ofxIpVideoGrabber::getNumFramesReceived() {
     if(isConnected()) {
-        return nFramesReceived;
+        ofxScopedLock lock(mutex);
+        return nFrames_a;
     } else {
         return 0;
     }
@@ -618,7 +634,8 @@ unsigned long ofxIpVideoGrabber::getNumFramesReceived() {
 //--------------------------------------------------------------
 unsigned long ofxIpVideoGrabber::getNumBytesReceived() {
     if(isConnected()) {
-        return nBytesReceived;
+        ofxScopedLock lock(mutex);
+        return nBytes_a;
     } else {
         return 0;
     }
