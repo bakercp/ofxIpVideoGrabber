@@ -169,12 +169,13 @@ void testApp::draw(){
         
         stringstream ss;
         
+        // ofToString formatting available in 0072+
         ss << "          NAME: " << ipGrabber[i]->getCameraName() << endl;
         ss << "          HOST: " << ipGrabber[i]->getHost() << endl;
-        ss << "           FPS: " << ofToString(fps,  2,13,' ') << endl;
-        ss << "          Kb/S: " << ofToString(kbps, 2,13,' ') << endl;
-        ss << " #Bytes Recv'd: " << ofToString(ipGrabber[i]->getNumBytesReceived(),  0,10,' ') << endl;
-        ss << "#Frames Recv'd: " << ofToString(ipGrabber[i]->getNumFramesReceived(), 0,10,' ') << endl;
+        ss << "           FPS: " << ofToString(fps,  2/*,13,' '*/) << endl;
+        ss << "          Kb/S: " << ofToString(kbps, 2/*,13,' '*/) << endl;
+        ss << " #Bytes Recv'd: " << ofToString(ipGrabber[i]->getNumBytesReceived(),  0/*,10,' '*/) << endl;
+        ss << "#Frames Recv'd: " << ofToString(ipGrabber[i]->getNumFramesReceived(), 0/*,10,' '*/) << endl;
         ss << "Auto Reconnect: " << (ipGrabber[i]->getAutoReconnect() ? "YES" : "NO") << endl;
         ss << " Needs Connect: " << (ipGrabber[i]->getNeedsReconnect() ? "YES" : "NO") << endl;
         ss << "Time Till Next: " << ipGrabber[i]->getTimeTillNextAutoRetry() << " ms" << endl;
@@ -200,9 +201,10 @@ void testApp::draw(){
     ofRect(5,5, 150, 40);
     
     ofSetColor(255);
-    ofDrawBitmapString(" AVG FPS: " + ofToString(avgFPS,2,7,' '), 10,17);
-    ofDrawBitmapString("AVG Kb/S: " + ofToString(avgKbps,2,7,' '), 10,29);
-    ofDrawBitmapString("TOT Kb/S: " + ofToString(totalKbps,2,7,' '), 10,41);
+    // ofToString formatting available in 0072+
+    ofDrawBitmapString(" AVG FPS: " + ofToString(avgFPS,2/*,7,' '*/), 10,17);
+    ofDrawBitmapString("AVG Kb/S: " + ofToString(avgKbps,2/*,7,' '*/), 10,29);
+    ofDrawBitmapString("TOT Kb/S: " + ofToString(totalKbps,2/*,7,' '*/), 10,41);
     ofDisableAlphaBlending();
 
 }
