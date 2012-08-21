@@ -20,8 +20,8 @@ void testApp::setup(){
         // c->setPassword(cam.password);
         
         // if your camera uses cookies for authentication, use something like this:
-        // ipGrabber[i].setCookie("user", cam.username);
-        // ipGrabber[i].setCookie("password", cam.password);
+        // ipGrabber[i]->setCookie("user", cam.username);
+        // ipGrabber[i]->setCookie("password", cam.password);
         
         c->setCameraName(cam.name);
         c->setURI(cam.url);
