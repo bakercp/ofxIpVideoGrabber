@@ -8,7 +8,6 @@ void testApp::setup(){
     ofSetLogLevel(OF_LOG_VERBOSE);
     ofSetFrameRate(30);
     loadCameras();
-
     
     // initialize connection
     for(int i = 0; i < NUM_CAMERAS; i++) {
