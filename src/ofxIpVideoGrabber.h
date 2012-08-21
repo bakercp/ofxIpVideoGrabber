@@ -24,48 +24,16 @@
 
 #pragma once
 
-#include "ofMain.h"
-
-#include "Poco/Net/HTTPClientSession.h"
-#include "Poco/Net/HTTPStreamFactory.h"
-#include "Poco/Net/HTTPBasicCredentials.h"
-#include "Poco/Net/MessageHeader.h"
-#include "Poco/Net/NetException.h"
-#include "Poco/Net/HTTPRequest.h"
-#include "Poco/Net/HTTPResponse.h"
-#include "Poco/Net/HTTPCookie.h"
-#include "Poco/StreamCopier.h"
-#include "Poco/Path.h"
-#include "Poco/URI.h"
-#include "Poco/Exception.h"
-
-#include "Poco/Net/NameValueCollection.h"
-
-#include "Poco/StreamTokenizer.h"
-#include "Poco/Token.h"
-
 #include <iostream>
 
-using Poco::Net::HTTPClientSession;
-using Poco::Net::HTTPStreamFactory;
-using Poco::Net::HTTPBasicCredentials;
-using Poco::Net::MessageHeader;
-using Poco::Net::HTTPRequest;
-using Poco::Net::HTTPResponse;
-using Poco::Net::HTTPMessage;
-using Poco::Net::NameValueCollection;
-using Poco::Net::NoMessageException;
-using Poco::StreamCopier;
-using Poco::Path;
-using Poco::URI;
-using Poco::Exception;
+#include "ofMain.h"
 
-using Poco::StreamTokenizer;
-using Poco::Token;
-using Poco::trim;
-using Poco::trimRightInPlace;
-
-using Poco::icompare;
+#include "Poco/Exception.h"
+#include "Poco/Path.h"
+#include "Poco/StreamTokenizer.h"
+#include "Poco/StreamCopier.h"
+#include "Poco/Token.h"
+#include "Poco/URI.h"
 
 enum ConnectionState {
   DISCONNECTED,
@@ -73,7 +41,19 @@ enum ConnectionState {
   CONNECTED,
   DISCONNECTING
 };
+#include "Poco/Net/HTTPBasicCredentials.h"
 
+#include "Poco/Net/HTTPClientSession.h"
+#include "Poco/Net/HTTPCookie.h"
+#include "Poco/Net/HTTPRequest.h"
+#include "Poco/Net/HTTPResponse.h"
+#include "Poco/Net/HTTPStreamFactory.h"
+#include "Poco/Net/MessageHeader.h"
+#include "Poco/Net/NameValueCollection.h"
+#include "Poco/Net/NetException.h"
+
+using namespace Poco;
+using namespace Poco::Net;
 
 class ofxIpVideoGrabber : public ofBaseVideoDraws, protected ofThread {
 public:
@@ -93,6 +73,7 @@ public:
     // ofBaseVideo
 	bool isFrameNew();
 	void close();
+    
 
     // ofBaseHasPixels
 	unsigned char * getPixels();
@@ -130,11 +111,13 @@ public:
     string getURI() const;
     URI getPocoURI() const;
     
+    // poco uri access
     string getHost() const;
     string getQuery() const;
     int getPort() const;
     string getFragment() const;
     
+    // cookies
     void setCookie(const string& key, const string& value);
     void eraseCookie(const string& key);
     string getCookie(const string& key) const;
@@ -171,6 +154,7 @@ protected:
     void threadedFunction(); // connect to server
     void imageResized(int width, int height);
     void resetStats();
+    
     
 private: 
 
