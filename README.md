@@ -4,7 +4,7 @@
 
 #Description
 
-ofxIpVideoGrabber is an Open Frameworks addon for used to capture video streams from IP Cameras that use the mjpeg streaming protocol.  Public cameras can be found with a google search like this:
+ofxIpVideoGrabber is an Open Frameworks addon used to capture video streams from IP Cameras that use the mjpeg streaming protocol.  Public cameras can be found with a google search like this:
 
 http://www.google.com/search?q=inurl%3A%22axis-cgi%2Fmjpg%22
 
