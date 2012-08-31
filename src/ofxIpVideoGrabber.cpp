@@ -144,6 +144,8 @@ void ofxIpVideoGrabber::update() {
         return;
     }
 
+    isNewFrameLoaded = false;
+
     bool shouldDisconnect = false;
 
     unsigned long now = ofGetSystemTime();
@@ -187,7 +189,8 @@ void ofxIpVideoGrabber::update() {
             img = ofPtr<ofImage>(new ofImage());
             img->setFromPixels(image_a[ci].getPixelsRef());
             
-            isNewFrameLoaded = true;
+            isNewFrameLoaded = true; // we only set this to true.  this setup is analogous to
+                                     // has new pixels in ofVideo
             
             isBackBufferReady_a = false;
         }
@@ -352,9 +355,6 @@ unsigned long ofxIpVideoGrabber::getTimeTillNextAutoRetry() {
         return nextAutoRetry_a - ofGetSystemTime();
     }
 }
-
-
-
 
 //--------------------------------------------------------------
 void ofxIpVideoGrabber::setDefaultBoundaryMarker(const string& _defaultBoundaryMarker) {
