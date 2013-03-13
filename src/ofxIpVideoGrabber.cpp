@@ -146,8 +146,6 @@ void ofxIpVideoGrabber::update() {
 
     isNewFrameLoaded = false;
 
-    bool shouldDisconnect = false;
-
     unsigned long now = ofGetSystemTime();
     
     string cName = getCameraName(); // consequence of scoped locking
@@ -486,7 +484,7 @@ void ofxIpVideoGrabber::threadedFunction(){
         bool resetBuffer = false;
         
         // mjpeg params
-        int contentLength = 0;
+        // int contentLength = 0;
         string boundaryType;
         
         while( isThreadRunning() ){
@@ -513,7 +511,7 @@ void ofxIpVideoGrabber::threadedFunction(){
                                 string& value = keyValue[1]; // reference to trimmed val for better readability
                                 
                                 if(icompare(string("content-length"), key) == 0) {
-                                    contentLength = ofToInt(value);
+                                    // contentLength = ofToInt(value);
                                     // TODO: we don't currently use content length, but could
                                 } else if(icompare(string("content-type"), key) == 0) {
                                     boundaryType = value;
