@@ -1,30 +1,33 @@
-/*==============================================================================
- 
- Copyright (c) 2011, 2012 Christopher Baker <http://christopherbaker.net>
- 
- Permission is hereby granted, free of charge, to any person obtaining a copy
- of this software and associated documentation files (the "Software"), to deal
- in the Software without restriction, including without limitation the rights
- to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- copies of the Software, and to permit persons to whom the Software is
- furnished to do so, subject to the following conditions:
- 
- The above copyright notice and this permission notice shall be included in
- all copies or substantial portions of the Software.
- 
- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- THE SOFTWARE.
+// =============================================================================
+//
+// Copyright (c) 2009-2013 Christopher Baker <http://christopherbaker.net>
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+// =============================================================================
 
- ==============================================================================*/
 
 #include "ofxIpVideoGrabber.h"
 
-enum ContentStreamMode {
+
+enum ContentStreamMode
+{
     MODE_HEADER = 0,
     MODE_JPEG = 1
 };
@@ -38,9 +41,11 @@ static char JFF = 0xFF;
 static char SOI = 0xD8;
 static char EOI = 0xD9;
 
-//--------------------------------------------------------------
-ofxIpVideoGrabber::ofxIpVideoGrabber() : ofBaseVideoDraws(), ofThread() {
-    
+
+//------------------------------------------------------------------------------
+ofxIpVideoGrabber::ofxIpVideoGrabber(): ofBaseVideoDraws(), ofThread()
+{
+
     ci = 0; // current index
     
     // prepare the double buffer
@@ -92,7 +97,7 @@ ofxIpVideoGrabber::ofxIpVideoGrabber() : ofBaseVideoDraws(), ofThread() {
     proxyUsername_a = "";
     proxyPassword_a = "";
     proxyHost_a = "127.0.0.1";
-    proxyPort_a = HTTPSession::HTTP_PORT;
+    proxyPort_a = Poco::Net::HTTPSession::HTTP_PORT;
     
     // AXIS default (--myboundary)
     // other cameras have other odd boundaries
@@ -111,8 +116,9 @@ ofxIpVideoGrabber::ofxIpVideoGrabber() : ofBaseVideoDraws(), ofThread() {
     ofAddListener(ofEvents().exit,this,&ofxIpVideoGrabber::exit);
 }
 
-//--------------------------------------------------------------
-ofxIpVideoGrabber::~ofxIpVideoGrabber() {
+//------------------------------------------------------------------------------
+ofxIpVideoGrabber::~ofxIpVideoGrabber()
+{
     // N.B. In most cases, ofxIpVideoGrabber::exit() will be called before
     // the program ever makes it into this destructor, but in some cases we
     waitForDisconnect(); //
@@ -124,21 +130,25 @@ ofxIpVideoGrabber::~ofxIpVideoGrabber() {
     ofRemoveListener(ofEvents().exit,this,&ofxIpVideoGrabber::exit);
 }
 
+//------------------------------------------------------------------------------
 void ofxIpVideoGrabber::exit(ofEventArgs & a) {
     ofLogVerbose("ofxIpVideoGrabber") << "exit() called on [" << getCameraName() << "] -- cleaning up and exiting.";
     waitForDisconnect();
     ofRemoveListener(ofEvents().exit,this,&ofxIpVideoGrabber::exit);
 }
 
-//--------------------------------------------------------------
-void ofxIpVideoGrabber::update(ofEventArgs & a) {
+//------------------------------------------------------------------------------
+void ofxIpVideoGrabber::update(ofEventArgs& a)
+{
     update();
 }
 
-//--------------------------------------------------------------
-void ofxIpVideoGrabber::update() {
+//------------------------------------------------------------------------------
+void ofxIpVideoGrabber::update()
+{
         
-    if(!isMainThread()) {
+    if(!isMainThread())
+    {
         // we enforce this because textures are uploaded here.
         ofLogError("ofxIpVideoGrabber") << "update() may not be called from outside the main thread.  Returning.";
         return;
@@ -148,9 +158,10 @@ void ofxIpVideoGrabber::update() {
 
     unsigned long now = ofGetSystemTime();
     
-    string cName = getCameraName(); // consequence of scoped locking
+    std::string cName = getCameraName(); // consequence of scoped locking
     
-    if(isConnected()) {
+    if(isConnected())
+    {
         ///////////////////////////////
         mutex.lock();     // LOCKING //
         ///////////////////////////////
@@ -193,21 +204,30 @@ void ofxIpVideoGrabber::update() {
             isBackBufferReady_a = false;
         }
         
-        if(elapsedTime_a > 0) {
+        if(elapsedTime_a > 0)
+        {
             currentFrameRate = ( float(nFrames_a) )       / (elapsedTime_a / (1000.0f)); // frames per second
             currentBitRate   = ( float(nBytes_a ) / 8.0f) / (elapsedTime_a / (1000.0f)); // bits per second
-        } else {
+        }
+        else
+        {
             currentFrameRate = 0;
             currentBitRate   = 0;
         }
         
-        if(currentBitRate > minBitrate) {
+        if(currentBitRate > minBitrate)
+        {
             lastValidBitrateTime = elapsedTime_a;
-        } else {
-            if((elapsedTime_a - lastValidBitrateTime) > reconnectTimeout) {
+        }
+        else
+        {
+            if((elapsedTime_a - lastValidBitrateTime) > reconnectTimeout)
+            {
                 ofLogVerbose("ofxIpVideoGrabber") << "["<< cName << "] Disconnecting because of slow bitrate." << isConnected();
                 needsReconnect_a = true;
-            } else {
+            }
+            else
+            {
                 // slowed below min bitrate, waiting to see if we are too low for long enought to merit a reconnect
             }
         }
@@ -215,19 +235,29 @@ void ofxIpVideoGrabber::update() {
         ///////////////////////////////
         mutex.unlock(); // UNLOCKING //
         ///////////////////////////////
-    } else {
+    }
+    else
+    {
         
-        if(getNeedsReconnect()) {
-            if(getReconnectCount() < maxReconnects) {
+        if(getNeedsReconnect())
+        {
+            if(getReconnectCount() < maxReconnects)
+            {
                 unsigned long nar = getNextAutoRetryTime();
-                if(now > getNextAutoRetryTime()) {
+                if(now > getNextAutoRetryTime())
+                {
                     ofLogVerbose("ofxIpVideoGrabber") << "[" << cName << "] attempting reconnection " << getReconnectCount() << "/" << maxReconnects;
                     connect();
-                } else {
+                }
+                else
+                {
                     ofLogVerbose("ofxIpVideoGrabber") << "[" << cName << "] retry connect in " << (nar - now) << " ms.";
                 }
-            } else {
-                if(!connectionFailure) {
+            }
+            else
+            {
+                if(!connectionFailure)
+                {
                     ofLogError("ofxIpVideoGrabber") << "["<< cName << "] Connection retries exceeded, connection connection failed.  Call ::reset() to try again.";
                     connectionFailure = true;
                 }
@@ -235,12 +265,13 @@ void ofxIpVideoGrabber::update() {
         }
     }
     
-
 }
 
-//--------------------------------------------------------------
-void ofxIpVideoGrabber::connect() {
-    if(!isConnected()) {
+//------------------------------------------------------------------------------
+void ofxIpVideoGrabber::connect()
+{
+    if(!isConnected())
+    {
         // start the thread.
         
         lastValidBitrateTime = 0;
@@ -249,34 +280,44 @@ void ofxIpVideoGrabber::connect() {
         currentFrameRate = 0.0;
 
         startThread(true, false);   // blocking, verbose
-    } else {
+    }
+    else
+    {
         ofLogWarning("ofxIpVideoGrabber")  << "[" << getCameraName() << "]: Already connected.  Disconnect first.";
     }
 }
 
-//--------------------------------------------------------------
-void ofxIpVideoGrabber::waitForDisconnect() {
-    if(isConnected()) {
+//------------------------------------------------------------------------------
+void ofxIpVideoGrabber::waitForDisconnect()
+{
+    if(isConnected())
+    {
         waitForThread(true); // close it all down (politely) -- true sets running flag
     }
 }
 
-//--------------------------------------------------------------
-void ofxIpVideoGrabber::disconnect() {
-    if(isConnected()) {
+//------------------------------------------------------------------------------
+void ofxIpVideoGrabber::disconnect()
+{
+    if(isConnected())
+    {
         stopThread();
-    } else {
+    }
+    else
+    {
         ofLogWarning("ofxIpVideoGrabber")  << "[" << getCameraName() << "]: Not connected.  Connect first.";
     }
 }
 
-//--------------------------------------------------------------
-void ofxIpVideoGrabber::close() {
+//------------------------------------------------------------------------------
+void ofxIpVideoGrabber::close()
+{
     disconnect();
 }
 
-//--------------------------------------------------------------
-void ofxIpVideoGrabber::reset() {
+//------------------------------------------------------------------------------
+void ofxIpVideoGrabber::reset()
+{
     mutex.lock();
     reconnectCount_a = 0;
     connectionFailure = false;
@@ -284,100 +325,118 @@ void ofxIpVideoGrabber::reset() {
     waitForDisconnect();
 }
 
-//--------------------------------------------------------------
-bool ofxIpVideoGrabber::isConnected() {
+//------------------------------------------------------------------------------
+bool ofxIpVideoGrabber::isConnected()
+{
     return isThreadRunning();
 }
 
-//--------------------------------------------------------------
-bool ofxIpVideoGrabber::hasConnectionFailed() const {
+//------------------------------------------------------------------------------
+bool ofxIpVideoGrabber::hasConnectionFailed() const
+{
     return connectionFailure;
 }
 
-//--------------------------------------------------------------
-unsigned long ofxIpVideoGrabber::getReconnectTimeout() const {
+//------------------------------------------------------------------------------
+unsigned long ofxIpVideoGrabber::getReconnectTimeout() const
+{
     return reconnectTimeout;
 }
 
-//--------------------------------------------------------------
-bool ofxIpVideoGrabber::getNeedsReconnect() {
+//------------------------------------------------------------------------------
+bool ofxIpVideoGrabber::getNeedsReconnect()
+{
     ofScopedLock lock(mutex);
     return needsReconnect_a;
 }
 
-//--------------------------------------------------------------
-bool ofxIpVideoGrabber::getAutoReconnect() const {
+//------------------------------------------------------------------------------
+bool ofxIpVideoGrabber::getAutoReconnect() const
+{
     return autoReconnect;
 }
 
-//--------------------------------------------------------------
-unsigned long ofxIpVideoGrabber::getReconnectCount() {
+//------------------------------------------------------------------------------
+unsigned long ofxIpVideoGrabber::getReconnectCount()
+{
     ofScopedLock lock(mutex);
     return reconnectCount_a;
 }
 
-//--------------------------------------------------------------
-unsigned long ofxIpVideoGrabber::getMaxReconnects() const {
+//------------------------------------------------------------------------------
+unsigned long ofxIpVideoGrabber::getMaxReconnects() const
+{
     return maxReconnects;
 }
 
-//--------------------------------------------------------------
-void ofxIpVideoGrabber::setMaxReconnects(unsigned long num) {
+//------------------------------------------------------------------------------
+void ofxIpVideoGrabber::setMaxReconnects(unsigned long num)
+{
     maxReconnects = num;
 }
 
-//--------------------------------------------------------------
-unsigned long ofxIpVideoGrabber::getAutoRetryDelay() {
+//------------------------------------------------------------------------------
+unsigned long ofxIpVideoGrabber::getAutoRetryDelay()
+{
     ofScopedLock lock(mutex);
     return autoRetryDelay_a;
 }
 
-//--------------------------------------------------------------
-void ofxIpVideoGrabber::setAutoRetryDelay(unsigned long delay_ms) {
+//------------------------------------------------------------------------------
+void ofxIpVideoGrabber::setAutoRetryDelay(unsigned long delay_ms)
+{
     ofScopedLock lock(mutex);
     autoRetryDelay_a = delay_ms;
 }
 
-//--------------------------------------------------------------
-unsigned long ofxIpVideoGrabber::getNextAutoRetryTime() {
+//------------------------------------------------------------------------------
+unsigned long ofxIpVideoGrabber::getNextAutoRetryTime()
+{
     ofScopedLock lock(mutex);
     return nextAutoRetry_a;
 }
 
-//--------------------------------------------------------------
-unsigned long ofxIpVideoGrabber::getTimeTillNextAutoRetry() {
+//------------------------------------------------------------------------------
+unsigned long ofxIpVideoGrabber::getTimeTillNextAutoRetry()
+{
     ofScopedLock lock(mutex);
-    if(nextAutoRetry_a == 0) {
+    if(nextAutoRetry_a == 0)
+    {
         return 0;
-    } else {
+    }
+    else
+    {
         return nextAutoRetry_a - ofGetSystemTime();
     }
 }
 
-//--------------------------------------------------------------
-void ofxIpVideoGrabber::setDefaultBoundaryMarker(const string& _defaultBoundaryMarker) {
+//------------------------------------------------------------------------------
+void ofxIpVideoGrabber::setDefaultBoundaryMarker(const std::string& _defaultBoundaryMarker)
+{
     ofScopedLock lock(mutex);
     defaultBoundaryMarker_a = _defaultBoundaryMarker;
-    if(isConnected()) {
+    if(isConnected())
+    {
         ofLogWarning("ofxIpVideoGrabber") << "Session currently active.  New boundary info will be applied on the next connection.";
     }
 }
 
-//--------------------------------------------------------------
-string ofxIpVideoGrabber::getDefaultBoundaryMarker() {
+//------------------------------------------------------------------------------
+std::string ofxIpVideoGrabber::getDefaultBoundaryMarker()
+{
     ofScopedLock lock(mutex);
     return defaultBoundaryMarker_a;
 }
 
-
-//--------------------------------------------------------------
-void ofxIpVideoGrabber::threadedFunction(){
+//------------------------------------------------------------------------------
+void ofxIpVideoGrabber::threadedFunction()
+{
     
-    char* cBuf = new char[BUF_LEN];
+    char cBuf[BUF_LEN];
 
     ofBuffer buffer;
-    
-    HTTPClientSession session;
+
+    Poco::Net::HTTPClientSession session;
     
     ///////////////////////////
 	mutex.lock(); // LOCKING //
@@ -399,13 +458,17 @@ void ofxIpVideoGrabber::threadedFunction(){
     
     // configure proxy
 
-    if(bUseProxy_a) {
-        if(!proxyHost_a.empty()) {
+    if(bUseProxy_a)
+    {
+        if(!proxyHost_a.empty())
+        {
             session.setProxy(proxyHost_a);
             session.setProxyPort(proxyPort_a);
             if(!proxyUsername_a.empty()) session.setProxyUsername(proxyUsername_a);
             if(!proxyPassword_a.empty()) session.setProxyPassword(proxyPassword_a);
-        } else {
+        }
+        else
+        {
             ofLogError("ofxIpVideoGrabber") << "Attempted to use web proxy, but proxy host was empty.  Continuing without proxy.";
         }
     }
@@ -419,15 +482,16 @@ void ofxIpVideoGrabber::threadedFunction(){
     session.setTimeout(Poco::Timespan(sessionTimeout / 1000,0)); // 20 sececond timeout
     
     // add trailing slash if nothing is there
-    string path(uri_a.getPathAndQuery());
-    if (path.empty()) path = "/";
+    std::string path(uri_a.getPathAndQuery());
+    if(path.empty()) path = "/";
 
     // create our header request
-    HTTPRequest request(HTTPRequest::HTTP_GET, path, HTTPMessage::HTTP_1_1); // 1.1 for persistent connections
+    Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_GET, path, Poco::Net::HTTPMessage::HTTP_1_1); // 1.1 for persistent connections
 
     // do basic access authentication if needed
-    if(!username_a.empty() || !password_a.empty()) {
-        HTTPBasicCredentials credentials;
+    if(!username_a.empty() || !password_a.empty())
+    {
+        Poco::Net::HTTPBasicCredentials credentials;
         credentials.setUsername(username_a);
         credentials.setPassword(password_a);
         credentials.authenticate(request);
@@ -444,36 +508,40 @@ void ofxIpVideoGrabber::threadedFunction(){
     // start communicating //
     /////////////////////////
 
-    HTTPResponse response; // the empty data structure to fill with the response headers
+    Poco::Net::HTTPResponse response; // the empty data structure to fill with the response headers
 
-    try {
-        
+    try
+    {
+
         // sendn the http request.
-        ostream& requestOutputStream = session.sendRequest(request);
+        std::ostream& requestOutputStream = session.sendRequest(request);
         
         // check the return stream for success.
-        if(requestOutputStream.bad() || requestOutputStream.fail()) {
-            throw Exception("Error communicating with server during sendRequest.");
+        if(requestOutputStream.bad() || requestOutputStream.fail())
+        {
+            throw Poco::Exception("Error communicating with server during sendRequest.");
         }
         
         // prepare to receive the response
-        istream& responseInputStream = session.receiveResponse(response); // invalidates requestOutputStream
+        std::istream& responseInputStream = session.receiveResponse(response); // invalidates requestOutputStream
         
         // get and test the status code
-        HTTPResponse::HTTPStatus status = response.getStatus();
+        Poco::Net::HTTPResponse::HTTPStatus status = response.getStatus();
         
-        if(status != HTTPResponse::HTTP_OK) {
-            throw Exception("Invalid HTTP Reponse : " + response.getReasonForStatus(status),status);
+        if(status != Poco::Net::HTTPResponse::HTTP_OK)
+        {
+            throw Poco::Exception("Invalid HTTP Reponse : " + response.getReasonForStatus(status),status);
         }
         
-        NameValueCollection nvc;
-        string contentType;
-        string boundaryMarker;
-        HTTPResponse::splitParameters(response.getContentType(), contentType, nvc);
+        Poco::Net::NameValueCollection nvc;
+        std::string contentType;
+        std::string boundaryMarker;
+        Poco::Net::HTTPResponse::splitParameters(response.getContentType(), contentType, nvc);
     
         boundaryMarker = nvc.get("boundary",getDefaultBoundaryMarker()); // we call the getter here b/c not in critical section
         
-        if(icompare(string("--"), boundaryMarker.substr(0,2)) != 0) {
+        if(Poco::UTF8::icompare(std::string("--"), boundaryMarker.substr(0,2)) != 0)
+        {
             boundaryMarker = "--" + boundaryMarker; // prepend the marker
         }
         
@@ -485,11 +553,12 @@ void ofxIpVideoGrabber::threadedFunction(){
         
         // mjpeg params
         // int contentLength = 0;
-        string boundaryType;
+        std::string boundaryType;
         
-        while( isThreadRunning() ){
-            
-            if(!responseInputStream.fail() && !responseInputStream.bad()) {
+        while(isThreadRunning())
+        {
+            if(!responseInputStream.fail() && !responseInputStream.bad())
+            {
                 
                 resetBuffer = false;
                 responseInputStream.get(cBuf[c]); // put a byte in the buffer
@@ -498,57 +567,82 @@ void ofxIpVideoGrabber::threadedFunction(){
                 nBytes_a++; // count bytes
                 mutex.unlock();
                 
-                if(c > 0) {
-                    if(mode == MODE_HEADER && cBuf[c-1] == '\r' && cBuf[c] == '\n') {
-                        if(c > 1) {
+                if(c > 0)
+                {
+                    if(mode == MODE_HEADER && cBuf[c-1] == '\r' && cBuf[c] == '\n')
+                    {
+                        if(c > 1)
+                        {
                             cBuf[c-1] = 0; // NULL terminator
-                            string line(cBuf); // make a string object
+                            std::string line(cBuf); // make a string object
                             
-                            vector<string> keyValue = ofSplitString(line,":", true); // split it (try)
-                            if(keyValue.size() > 1) { // a param!
+                            std::vector<std::string> keyValue = ofSplitString(line,":", true); // split it (try)
+                            if(keyValue.size() > 1)
+                            { // a param!
                                 
-                                string& key   = keyValue[0]; // reference to trimmed key for better readability
-                                string& value = keyValue[1]; // reference to trimmed val for better readability
+                                std::string& key   = keyValue[0]; // reference to trimmed key for better readability
+                                std::string& value = keyValue[1]; // reference to trimmed val for better readability
                                 
-                                if(icompare(string("content-length"), key) == 0) {
+                                if(Poco::UTF8::icompare(std::string("content-length"),key) == 0)
+                                {
                                     // contentLength = ofToInt(value);
                                     // TODO: we don't currently use content length, but could
-                                } else if(icompare(string("content-type"), key) == 0) {
+                                }
+                                else if(Poco::UTF8::icompare(std::string("content-type"), key) == 0)
+                                {
                                     boundaryType = value;
-                                } else {
+                                }
+                                else
+                                {
                                     ofLogVerbose("ofxIpVideoGrabber") << "additional header " << key << "=" << value << " found.";
                                 }
-                            } else {
-                                if(icompare(boundaryMarker, line) == 0) {
+                            }
+                            else
+                            {
+                                if(Poco::UTF8::icompare(boundaryMarker,line) == 0)
+                                {
                                     mode = MODE_HEADER;
-                                } else {
+                                }
+                                else
+                                {
                                     // just a new line
                                 }
                                 // this is where line == "--myboundary"
                             }
-                        } else {
+                        }
+                        else
+                        {
                             // just waiting for at least two bytes
                         }
                         
                         resetBuffer = true; // reset upon new line
                         
-                    } else if(cBuf[c-1] == JFF) {
-                        if(cBuf[c] == SOI ) {
+                    }
+                    else if(cBuf[c-1] == JFF)
+                    {
+                        if(cBuf[c] == SOI)
+                        {
                             mode = MODE_JPEG;
-                        } else if(cBuf[c] == EOI ) {
+                        }
+                        else if(cBuf[c] == EOI)
+                        {
                             buffer = ofBuffer(cBuf, c+1);
-                            if( c >= MIN_JPEG_SIZE) { // some cameras send 2+ EOIs in a row, with no valid bytes in between
 
-                                
+                            if( c >= MIN_JPEG_SIZE)
+                            { // some cameras send 2+ EOIs in a row, with no valid bytes in between
+    
                                 ///////////////////////////////
                                 mutex.lock();     // LOCKING //
                                 ///////////////////////////////
 
                                 // get the back image (ci^1)
-                                if(image_a[ci^1].loadImage(buffer)) {
+                                if(image_a[ci^1].loadImage(buffer))
+                                {
                                     isBackBufferReady_a = true;
                                     nFrames_a++; // incrase frame cout
-                                } else {
+                                }
+                                else
+                                {
                                     ofLogError("ofxIpVideoGrabber") << "ofImage could not load the curent buffer, continuing.";
                                 }
                                 
@@ -556,35 +650,56 @@ void ofxIpVideoGrabber::threadedFunction(){
                                 mutex.unlock(); // UNLOCKING //
                                 ///////////////////////////////
                                     
-                            } else {}
+                            }
+                            else
+                            {
+                            }
                             mode = MODE_HEADER;
                             resetBuffer = true;
-                        } else {}
-                    } else if(mode == MODE_JPEG) {
-                    } else {}
-                } else {}
-                
+                        }
+                        else
+                        {
+                        }
+                    }
+                    else if(mode == MODE_JPEG)
+                    {
+                    }
+                    else
+                    {
+                    }
+                }
+                else
+                {
+                }
                 
                 // check for buffer overflow
-                if(c >= BUF_LEN) {
+                if(c >= BUF_LEN)
+                {
                     resetBuffer = true;
                     ofLogError("ofxIpVideoGrabber") << "[" + getCameraName() +"]: buffer overflow, resetting stream.";
                 }
                 
                 // has anyone requested a buffer reset?
-                if(resetBuffer) {
+                if(resetBuffer)
+                {
                     c = 0;
-                } else {
+                }
+                else
+                {
                     c++;
                 }
                 
-            } else { // end stream check
-                throw Exception("ResponseInputStream failed or went bad -- it was probably interrupted.");
+            }
+            else
+            { // end stream check
+                throw Poco::Exception("ResponseInputStream failed or went bad -- it was probably interrupted.");
             }
             
         } // end while
 
-    } catch (Exception& e) {
+    }
+    catch (Poco::Exception& e)
+    {
         mutex.lock();
         needsReconnect_a = true;
         nextAutoRetry_a = ofGetSystemTime() + autoRetryDelay_a;
@@ -596,332 +711,398 @@ void ofxIpVideoGrabber::threadedFunction(){
     // clean up the session
     session.reset();
 
-    // clean up the buffer
-    delete[] cBuf;
-    cBuf = NULL;
-
     // fall off the end of the loop ...
 }
 
-//--------------------------------------------------------------
-bool ofxIpVideoGrabber::isFrameNew() {
+//------------------------------------------------------------------------------
+bool ofxIpVideoGrabber::isFrameNew()
+{
     return isNewFrameLoaded;
 }
 
-//--------------------------------------------------------------
-unsigned char * ofxIpVideoGrabber::getPixels() {
+//------------------------------------------------------------------------------
+unsigned char* ofxIpVideoGrabber::getPixels()
+{
     return img->getPixels();
 }
 
-//--------------------------------------------------------------
-ofPixelsRef ofxIpVideoGrabber::getPixelsRef() {
+//------------------------------------------------------------------------------
+ofPixelsRef ofxIpVideoGrabber::getPixelsRef()
+{
     return img->getPixelsRef();
 }
 
-//--------------------------------------------------------------
-ofPtr<ofImage> ofxIpVideoGrabber::getFrame() {
+//------------------------------------------------------------------------------
+std::shared_ptr<ofImage> ofxIpVideoGrabber::getFrame()
+{
     return img;
 }
 
-//--------------------------------------------------------------
-ofTexture & ofxIpVideoGrabber::getTextureReference() {
+//------------------------------------------------------------------------------
+ofTexture & ofxIpVideoGrabber::getTextureReference()
+{
     return img->getTextureReference();
 }
 
-//--------------------------------------------------------------
-void ofxIpVideoGrabber::setUseTexture(bool bUseTex) {
+//------------------------------------------------------------------------------
+void ofxIpVideoGrabber::setUseTexture(bool bUseTex)
+{
     img->setUseTexture(bUseTex);
 }
 
-//--------------------------------------------------------------
-float ofxIpVideoGrabber::getWidth() {
+//------------------------------------------------------------------------------
+float ofxIpVideoGrabber::getWidth()
+{
     return img->getWidth();
 }
 
-//--------------------------------------------------------------
-float ofxIpVideoGrabber::getHeight() {
+//------------------------------------------------------------------------------
+float ofxIpVideoGrabber::getHeight()
+{
     return img->getHeight();
 }
 
-//--------------------------------------------------------------
-unsigned long ofxIpVideoGrabber::getNumFramesReceived() {
-    if(isConnected()) {
+//------------------------------------------------------------------------------
+unsigned long ofxIpVideoGrabber::getNumFramesReceived()
+{
+    if(isConnected())
+    {
         ofScopedLock lock(mutex);
         return nFrames_a;
-    } else {
+    }
+    else
+    {
         return 0;
     }
 }
 
-//--------------------------------------------------------------
-unsigned long ofxIpVideoGrabber::getNumBytesReceived() {
-    if(isConnected()) {
+//------------------------------------------------------------------------------
+unsigned long ofxIpVideoGrabber::getNumBytesReceived()
+{
+    if(isConnected())
+    {
         ofScopedLock lock(mutex);
         return nBytes_a;
-    } else {
+    }
+    else
+    {
         return 0;
     }
 }
 
-//--------------------------------------------------------------
-void ofxIpVideoGrabber::draw(float x, float y){
+//------------------------------------------------------------------------------
+void ofxIpVideoGrabber::draw(float x, float y)
+{
     img->draw(x,y);
 }
 
-//--------------------------------------------------------------
-void ofxIpVideoGrabber::draw(float x, float y, float width, float height) {
+//------------------------------------------------------------------------------
+void ofxIpVideoGrabber::draw(float x, float y, float width, float height)
+{
     img->draw(x,y,width,height);
 }
 
-//--------------------------------------------------------------
-void ofxIpVideoGrabber::draw(const ofPoint & point){
+//------------------------------------------------------------------------------
+void ofxIpVideoGrabber::draw(const ofPoint& point)
+{
     draw( point.x, point.y);
 }
 
-//--------------------------------------------------------------
-void ofxIpVideoGrabber::draw(const ofRectangle & rect){
+//------------------------------------------------------------------------------
+void ofxIpVideoGrabber::draw(const ofRectangle & rect)
+{
     draw(rect.x, rect.y, rect.width, rect.height); 
 }
 
-//--------------------------------------------------------------
-void ofxIpVideoGrabber::setAnchorPercent(float xPct, float yPct) {
+//------------------------------------------------------------------------------
+void ofxIpVideoGrabber::setAnchorPercent(float xPct, float yPct)
+{
     img->setAnchorPercent(xPct,yPct);
 }
 
-//--------------------------------------------------------------
+//------------------------------------------------------------------------------
 void ofxIpVideoGrabber::setAnchorPoint(float x, float y) {
     img->setAnchorPoint(x,y);
 }
 
-//--------------------------------------------------------------
-void ofxIpVideoGrabber::resetAnchor() {
+//------------------------------------------------------------------------------
+void ofxIpVideoGrabber::resetAnchor()
+{
     img->resetAnchor();
 }
 
-//--------------------------------------------------------------
-float ofxIpVideoGrabber::getFrameRate() {
-    if(isConnected()) {
-        return  currentFrameRate;
-    } else {
+//------------------------------------------------------------------------------
+float ofxIpVideoGrabber::getFrameRate()
+{
+    if(isConnected())
+    {
+        return currentFrameRate;
+    }
+    else
+    {
         return 0.0f;
     }
 }
     
-//--------------------------------------------------------------
-float ofxIpVideoGrabber::getBitRate() {
-    if(isConnected()) {
+//------------------------------------------------------------------------------
+float ofxIpVideoGrabber::getBitRate()
+{
+    if(isConnected())
+    {
         return currentBitRate;
-    } else {
+    }
+    else
+    {
         return 0.0f;
     }
 }
 
-//--------------------------------------------------------------
-void ofxIpVideoGrabber::setCameraName(const string& _cameraName) {
+//------------------------------------------------------------------------------
+void ofxIpVideoGrabber::setCameraName(const std::string& _cameraName)
+{
     ofScopedLock lock(mutex);
     cameraName_a = _cameraName;
 }
 
-//--------------------------------------------------------------
-string ofxIpVideoGrabber::getCameraName() {
+//------------------------------------------------------------------------------
+std::string ofxIpVideoGrabber::getCameraName()
+{
     ofScopedLock lock(mutex);
-    if(cameraName_a.empty()) {
+    if(cameraName_a.empty())
+    {
         return uri_a.toString();
-    } else {
+    }
+    else
+    {
         return cameraName_a;
     }
 }
 
-//--------------------------------------------------------------
-void ofxIpVideoGrabber::setCookie(const string& key, const string& value) {
+//------------------------------------------------------------------------------
+void ofxIpVideoGrabber::setCookie(const std::string& key, const std::string& value) {
     cookies.add(key, value);
-    if(isConnected()) {
+    if(isConnected())
+    {
         ofLogWarning("ofxIpVideoGrabber") << "Session currently active.  New cookie info will be applied on the next connection.";
     }
 }
 
-//--------------------------------------------------------------
-void ofxIpVideoGrabber::eraseCookie(const string& key) {
+//------------------------------------------------------------------------------
+void ofxIpVideoGrabber::eraseCookie(const std::string& key)
+{
     cookies.erase(key);
-    if(isConnected()) {
+    if(isConnected())
+    {
         ofLogWarning("ofxIpVideoGrabber") << "Session currently active.  New cookie info will be applied on the next connection.";
     }
 }
 
-//--------------------------------------------------------------
-string ofxIpVideoGrabber::getCookie(const string& key) {
+//------------------------------------------------------------------------------
+std::string ofxIpVideoGrabber::getCookie(const std::string& key)
+{
     ofScopedLock lock(mutex);
     return cookies.get(key);
 }
 
-//--------------------------------------------------------------
-void ofxIpVideoGrabber::setUsername(const string& _username) {
+//------------------------------------------------------------------------------
+void ofxIpVideoGrabber::setUsername(const std::string& _username)
+{
     ofScopedLock lock(mutex);
     username_a = _username;
-    if(isConnected()) {
+    if(isConnected())
+    {
         ofLogWarning("ofxIpVideoGrabber") << "Session currently active.  New authentication info will be applied on the next connection.";
     }
 }
 
 //--------------------------------------------------------------
-void ofxIpVideoGrabber::setPassword(const string& _password) {
+void ofxIpVideoGrabber::setPassword(const std::string& _password)
+{
     ofScopedLock lock(mutex);
     password_a = _password;
-    if(isConnected()) {
+    if(isConnected())
+    {
         ofLogWarning("ofxIpVideoGrabber") << "Session currently active.  New authentication info will be applied on the next connection.";
     }
 }
 
-//--------------------------------------------------------------
-string ofxIpVideoGrabber::getUsername() {
+//------------------------------------------------------------------------------
+std::string ofxIpVideoGrabber::getUsername()
+{
     ofScopedLock lock(mutex);
     return username_a;
 }
 
-//--------------------------------------------------------------
-string ofxIpVideoGrabber::getPassword() {
+//------------------------------------------------------------------------------
+std::string ofxIpVideoGrabber::getPassword()
+{
     ofScopedLock lock(mutex);
     return password_a;
 }
 
-//--------------------------------------------------------------
-string ofxIpVideoGrabber::getURI() {
+//------------------------------------------------------------------------------
+std::string ofxIpVideoGrabber::getURI()
+{
     ofScopedLock lock(mutex);
     return uri_a.toString();
 }
 
-//--------------------------------------------------------------
-string ofxIpVideoGrabber::getHost() {
+//------------------------------------------------------------------------------
+std::string ofxIpVideoGrabber::getHost()
+{
     return uri_a.getHost();
 }
 
-//--------------------------------------------------------------
-string ofxIpVideoGrabber::getQuery() {
+//------------------------------------------------------------------------------
+std::string ofxIpVideoGrabber::getQuery()
+{
     ofScopedLock lock(mutex);
     return uri_a.getQuery();
 }
 
-//--------------------------------------------------------------
-int ofxIpVideoGrabber::getPort() {
+//------------------------------------------------------------------------------
+int ofxIpVideoGrabber::getPort()
+{
     ofScopedLock lock(mutex);
     return uri_a.getPort();
 }
 
-//--------------------------------------------------------------
-string ofxIpVideoGrabber::getFragment() {
+//------------------------------------------------------------------------------
+std::string ofxIpVideoGrabber::getFragment()
+{
     ofScopedLock lock(mutex);
     return uri_a.getFragment();
 }
 
-//--------------------------------------------------------------
-URI ofxIpVideoGrabber::getPocoURI() {
+//------------------------------------------------------------------------------
+Poco::URI ofxIpVideoGrabber::getPocoURI()
+{
     ofScopedLock lock(mutex);
     return uri_a;
 }
 
-//--------------------------------------------------------------
-void ofxIpVideoGrabber::setURI(const string& _uri) {
+//------------------------------------------------------------------------------
+void ofxIpVideoGrabber::setURI(const std::string& _uri)
+{
     ofScopedLock lock(mutex);
-    uri_a = URI(_uri);
+    uri_a = Poco::URI(_uri);
     if(isThreadRunning()) {
         ofLogWarning("ofxIpVideoGrabber") << "Session currently active.  New URI will be applied on the next connection.";
     }
 }
 
-//--------------------------------------------------------------
-void ofxIpVideoGrabber::setURI(const URI& _uri) {
+//------------------------------------------------------------------------------
+void ofxIpVideoGrabber::setURI(const Poco::URI& _uri)
+{
     ofScopedLock lock(mutex);
     uri_a = _uri;
-    if(isThreadRunning()) {
+    if(isThreadRunning())
+    {
         ofLogWarning("ofxIpVideoGrabber") << "Session currently active.  New URI will be applied on the next connection.";
     }
 }
 
-//--------------------------------------------------------------
-void ofxIpVideoGrabber::setUseProxy(bool useProxy) {
+//------------------------------------------------------------------------------
+void ofxIpVideoGrabber::setUseProxy(bool useProxy)
+{
     ofScopedLock lock(mutex);
     bUseProxy_a = useProxy;
-    if(isThreadRunning()) {
+    if(isThreadRunning())
+    {
         ofLogWarning("ofxIpVideoGrabber") << "Session currently active.  New proxy info will be applied on the next connection.";
     }
 }
 
-//--------------------------------------------------------------
-void ofxIpVideoGrabber::setProxyUsername(const string& username) {
+//------------------------------------------------------------------------------
+void ofxIpVideoGrabber::setProxyUsername(const std::string& username)
+{
     ofScopedLock lock(mutex);
     proxyUsername_a = username;
-    if(isThreadRunning()) {
+    if(isThreadRunning())
+    {
         ofLogWarning("ofxIpVideoGrabber") << "Session currently active.  New proxy info will be applied on the next connection.";
     }
 }
 
-//--------------------------------------------------------------
-void ofxIpVideoGrabber::setProxyPassword(const string& password) {
+//------------------------------------------------------------------------------
+void ofxIpVideoGrabber::setProxyPassword(const std::string& password)
+{
     ofScopedLock lock(mutex);
     proxyPassword_a = password;
-    if(isThreadRunning()) {
+    if(isThreadRunning())
+    {
         ofLogWarning("ofxIpVideoGrabber") << "Session currently active.  New proxy info will be applied on the next connection.";
     }
 }
 
-//--------------------------------------------------------------
-void ofxIpVideoGrabber::setProxyHost(const string& host) {
+//------------------------------------------------------------------------------
+void ofxIpVideoGrabber::setProxyHost(const std::string& host) {
     ofScopedLock lock(mutex);
     proxyHost_a = host;
-    if(isThreadRunning()) {
+    if(isThreadRunning())
+    {
         ofLogWarning("ofxIpVideoGrabber") << "Session currently active.  New proxy info will be applied on the next connection.";
     }
 }
 
-//--------------------------------------------------------------
-void ofxIpVideoGrabber::setProxyPort(Poco::UInt16 port) {
+//------------------------------------------------------------------------------
+void ofxIpVideoGrabber::setProxyPort(Poco::UInt16 port)
+{
     ofScopedLock lock(mutex);
     proxyPort_a = port;
-    if(isThreadRunning()) {
+    if(isThreadRunning())
+    {
         ofLogWarning("ofxIpVideoGrabber") << "Session currently active.  New proxy info will be applied on the next connection.";
     }
 }
 
-//--------------------------------------------------------------
-bool ofxIpVideoGrabber::getUseProxy() {
+//------------------------------------------------------------------------------
+bool ofxIpVideoGrabber::getUseProxy()
+{
     ofScopedLock lock(mutex);
     return bUseProxy_a;
 }
 
-//--------------------------------------------------------------
-string ofxIpVideoGrabber::getProxyUsername() {
+//------------------------------------------------------------------------------
+std::string ofxIpVideoGrabber::getProxyUsername()
+{
     ofScopedLock lock(mutex);
     return proxyUsername_a;
 }
 
-//--------------------------------------------------------------
-string ofxIpVideoGrabber::getProxyPassword() {
+//------------------------------------------------------------------------------
+std::string ofxIpVideoGrabber::getProxyPassword()
+{
     ofScopedLock lock(mutex);
     return proxyPassword_a;
 }
 
-//--------------------------------------------------------------
-string ofxIpVideoGrabber::getProxyHost() {
+//------------------------------------------------------------------------------
+std::string ofxIpVideoGrabber::getProxyHost()
+{
     ofScopedLock lock(mutex);
     return proxyHost_a;
 }
 
-//--------------------------------------------------------------
-UInt16 ofxIpVideoGrabber::getProxyPort() {
+//------------------------------------------------------------------------------
+Poco::UInt16 ofxIpVideoGrabber::getProxyPort()
+{
     ofScopedLock lock(mutex);
     return proxyPort_a;
 }
 
-//--------------------------------------------------------------
-void ofxIpVideoGrabber::imageResized(int width, int height) {
+//------------------------------------------------------------------------------
+void ofxIpVideoGrabber::imageResized(int width, int height)
+{
     ofResizeEventArgs resizeEvent;
     resizeEvent.width = width;
     resizeEvent.height = height;
     ofNotifyEvent(videoResized, resizeEvent, this);
 }
 
-//--------------------------------------------------------------
-void ofxIpVideoGrabber::setReconnectTimeout(unsigned long ms) {
+//------------------------------------------------------------------------------
+void ofxIpVideoGrabber::setReconnectTimeout(unsigned long ms)
+{
     reconnectTimeout = ms;
 }
 

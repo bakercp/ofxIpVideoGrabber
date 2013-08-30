@@ -1,41 +1,41 @@
-/*==============================================================================
- 
- Copyright (c) 2011, 2012 Christopher Baker <http://christopherbaker.net>
- 
- Permission is hereby granted, free of charge, to any person obtaining a copy
- of this software and associated documentation files (the "Software"), to deal
- in the Software without restriction, including without limitation the rights
- to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- copies of the Software, and to permit persons to whom the Software is
- furnished to do so, subject to the following conditions:
- 
- The above copyright notice and this permission notice shall be included in
- all copies or substantial portions of the Software.
- 
- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- THE SOFTWARE.
- 
- ==============================================================================*/
+// =============================================================================
+//
+// Copyright (c) 2009-2013 Christopher Baker <http://christopherbaker.net>
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+// =============================================================================
+
 
 #pragma once
 
+
 #include <iostream>
-
 #include "ofMain.h"
-
 #include "Poco/Exception.h"
 #include "Poco/Path.h"
 #include "Poco/StreamTokenizer.h"
 #include "Poco/StreamCopier.h"
+#include "Poco/UTF8String.h"
 #include "Poco/ScopedLock.h"
 #include "Poco/Token.h"
 #include "Poco/URI.h"
-
 #include "Poco/Net/HTTPBasicCredentials.h"
 #include "Poco/Net/HTTPClientSession.h"
 #include "Poco/Net/HTTPCookie.h"
@@ -46,15 +46,12 @@
 #include "Poco/Net/NameValueCollection.h"
 #include "Poco/Net/NetException.h"
 
-using namespace Poco;
-using namespace Poco::Net;
 
-typedef Poco::FastMutex::ScopedLock ofScopedLock;
-
-class ofxIpVideoGrabber : public ofBaseVideoDraws, protected ofThread {
+class ofxIpVideoGrabber: public ofBaseVideoDraws, protected ofThread
+{
 public:
-    
-    Poco::FastMutex myMutex;
+    typedef std::shared_ptr<ofxIpVideoGrabber> Ptr;
+    typedef Poco::FastMutex::ScopedLock ofScopedLock;
     
     ofxIpVideoGrabber();
     virtual ~ofxIpVideoGrabber();
@@ -76,13 +73,13 @@ public:
     void reset();
 
     // ofBaseHasPixels
-	unsigned char * getPixels();
+	unsigned char* getPixels();
 	ofPixelsRef getPixelsRef();
     
-    ofPtr<ofImage> getFrame();
+    std::shared_ptr<ofImage> getFrame();
     
     // ofBaseHasTexture
-    ofTexture & getTextureReference();
+    ofTexture& getTextureReference();
 	void setUseTexture(bool bUseTex);
 
     // ofBaseDraws
@@ -104,50 +101,48 @@ public:
     float getFrameRate();
     float getBitRate();
     
-    string getCameraName();
-    void setCameraName(const string& cameraName);
+    std::string getCameraName();
+    void setCameraName(const std::string& cameraName);
     
     // set video URI
-    void setURI(const string& uri);
-    void setURI(const URI& uri);
+    void setURI(const std::string& uri);
+    void setURI(const Poco::URI& uri);
 
-    string getURI();
-    URI getPocoURI();
+    std::string getURI();
+    Poco::URI getPocoURI();
     
     // poco uri access
-    string getHost();
-    string getQuery();
+    std::string getHost();
+    std::string getQuery();
     int getPort();
-    string getFragment();
+    std::string getFragment();
     
     // cookies
-    void setCookie(const string& key, const string& value);
-    void eraseCookie(const string& key);
-    string getCookie(const string& key);
+    void setCookie(const std::string& key, const std::string& value);
+    void eraseCookie(const std::string& key);
+    std::string getCookie(const std::string& key);
 
     // basic authentication
-    void setUsername(const string& username);
-    void setPassword(const string& password);
+    void setUsername(const std::string& username);
+    void setPassword(const std::string& password);
     
-    string getUsername();
-    string getPassword();
+    std::string getUsername();// const;
+    std::string getPassword();// const;
     
     // proxy server
-    
-    
     void setUseProxy(bool useProxy);
-    void setProxyUsername(const string& username);
-    void setProxyPassword(const string& password);
-    void setProxyHost(const string& host);
-    void setProxyPort(UInt16 port);
+    void setProxyUsername(const std::string& username);
+    void setProxyPassword(const std::string& password);
+    void setProxyHost(const std::string& host);
+    void setProxyPort(Poco::UInt16 port);
 
-    bool   getUseProxy();
-    string getProxyUsername();
-    string getProxyPassword();
-    string getProxyHost();
-    UInt16 getProxyPort();
+    bool getUseProxy(); // const;
+    std::string getProxyUsername();// const;
+    std::string getProxyPassword();// const;
+    std::string getProxyHost();// const;
+    Poco::UInt16 getProxyPort();// const;
     
-    HTTPClientSession& getSessionRef();
+    Poco::Net::HTTPClientSession& getSessionRef();
     
     bool isConnected();
     
@@ -160,43 +155,42 @@ public:
     unsigned long getReconnectCount();
     unsigned long getMaxReconnects() const;
     void setMaxReconnects(unsigned long num);
-    unsigned long getAutoRetryDelay();
+    unsigned long getAutoRetryDelay(); // const ofThread ...
     void setAutoRetryDelay(unsigned long delay_ms);
-    unsigned long getNextAutoRetryTime();
-    unsigned long getTimeTillNextAutoRetry();
+    unsigned long getNextAutoRetryTime(); // const ofThread...;
+    unsigned long getTimeTillNextAutoRetry(); // const ofThread...;
 
-    void setDefaultBoundaryMarker(const string& boundarMarker);
-    string getDefaultBoundaryMarker() ;
+    void setDefaultBoundaryMarker(const std::string& boundarMarker);
+    std::string getDefaultBoundaryMarker(); // const;
         
     ofEvent<ofResizeEventArgs> 	videoResized;
     
-protected:
-    
+protected:    
     void threadedFunction(); // connect to server
     void imageResized(int width, int height);
     
     
 private: 
 
-    string defaultBoundaryMarker_a;
+    std::string defaultBoundaryMarker_a;
     
-    string cameraName_a;
+    std::string cameraName_a;
 
     // credentials
-    string username_a;
-    string password_a;
+    std::string username_a;
+    std::string password_a;
     
-    bool   bUseProxy_a;
-    string proxyUsername_a;
-    string proxyPassword_a;
-    string proxyHost_a;
-    UInt16 proxyPort_a;
+    bool bUseProxy_a;
+    std::string proxyUsername_a;
+    std::string proxyPassword_a;
+    std::string proxyHost_a;
+    Poco::UInt16 proxyPort_a;
     
     //ofPixels pix;
     
     int ci; // current image index
     ofImage image_a[2]; // image double buffer.  this flips
-    ofPtr<ofImage> img;
+    std::shared_ptr<ofImage> img;
     
     bool isNewFrameLoaded;       // is there a new frame ready to be uploaded to glspace
     bool isBackBufferReady_a;
@@ -225,11 +219,13 @@ private:
 
     
     unsigned long sessionTimeout; // ms
-    URI uri_a;
+    Poco::URI uri_a;
     
-    NameValueCollection cookies;
-  
+    Poco::Net::NameValueCollection cookies;
+
+//    mutable Poco::FastMutex myMutex;
+
 };
 
-typedef ofPtr< ofxIpVideoGrabber > ofxSharedIpVideoGrabber;
 
+typedef ofxIpVideoGrabber::Ptr ofxSharedIpVideoGrabber;
