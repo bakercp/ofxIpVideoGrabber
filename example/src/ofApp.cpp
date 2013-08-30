@@ -1,16 +1,41 @@
-#include "testApp.h"
+// =============================================================================
+//
+// Copyright (c) 2009-2013 Christopher Baker <http://christopherbaker.net>
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+// =============================================================================
 
 
-bool locked = false;
+#include "ofApp.h"
 
-//--------------------------------------------------------------
-void testApp::setup(){
+
+//------------------------------------------------------------------------------
+void ofApp::setup()
+{
     ofSetLogLevel(OF_LOG_VERBOSE);
     ofSetFrameRate(30);
     loadCameras();
     
     // initialize connection
-    for(int i = 0; i < NUM_CAMERAS; i++) {
+    for(int i = 0; i < NUM_CAMERAS; i++)
+    {
         IPCameraDef& cam = getNextCamera();
         
         ofxSharedIpVideoGrabber c( new ofxIpVideoGrabber());
@@ -28,22 +53,23 @@ void testApp::setup(){
         c->connect(); // connect immediately
 
         // if desired, set up a video resize listener
-        ofAddListener(c->videoResized, this, &testApp::videoResized);
+        ofAddListener(c->videoResized, this, &ofApp::videoResized);
         
         ipGrabber.push_back(c);
 
     }
 }
 
-//--------------------------------------------------------------
-IPCameraDef& testApp::getNextCamera() {
+//------------------------------------------------------------------------------
+IPCameraDef& ofApp::getNextCamera()
+{
     nextCamera = (nextCamera + 1) % ipcams.size();
     return ipcams[nextCamera];
 }
 
-
-//--------------------------------------------------------------
-void testApp::loadCameras() {
+//------------------------------------------------------------------------------
+void ofApp::loadCameras()
+{
     
     // all of these cameras were found using this google query
     // http://www.google.com/search?q=inurl%3A%22axis-cgi%2Fmjpg%22
@@ -56,14 +82,16 @@ void testApp::loadCameras() {
 
 	ofxXmlSettings XML;
     
-	if( XML.loadFile("streams.xml") ){
+	if(XML.loadFile("streams.xml"))
+    {
 
         XML.pushTag("streams");
-		string tag = "stream";
+        std::string tag = "stream";
 		
 		int nCams = XML.getNumTags(tag);
 		
-		for(int n = 0; n < nCams; n++) {
+		for(std::size_t n = 0; n < nCams; n++)
+        {
             
             IPCameraDef def;
 
@@ -72,7 +100,7 @@ void testApp::loadCameras() {
 			def.username = XML.getAttribute(tag, "username", "", n);
 			def.password = XML.getAttribute(tag, "password", "", n);
 			
-			string logMessage = "STREAM LOADED: " + def.name +
+            std::string logMessage = "STREAM LOADED: " + def.name +
 			" url: " +  def.url +
 			" username: " + def.username +
 			" password: " + def.password;
@@ -84,44 +112,48 @@ void testApp::loadCameras() {
 		}
 		
 		XML.popTag();
-		
-        
-		
-	} else {
+
+	}
+    else
+    {
 		ofLog(OF_LOG_ERROR, "Unable to load streams.xml.");
 	}
-	ofLog(OF_LOG_NOTICE, "-----------Loading Streams Complete----------");
     
+	ofLog(OF_LOG_NOTICE, "-----------Loading Streams Complete----------");
     
     nextCamera = ipcams.size();
 }
 
-
-//--------------------------------------------------------------
-void testApp::videoResized(const void * sender, ofResizeEventArgs& arg) {
+//------------------------------------------------------------------------------
+void ofApp::videoResized(const void * sender, ofResizeEventArgs& arg)
+{
     // find the camera that sent the resize event changed
-    for(int i = 0; i < NUM_CAMERAS; i++) {
-        if(sender == &ipGrabber[i]) {
-            stringstream ss;
+    for(std::size_t i = 0; i < NUM_CAMERAS; i++)
+    {
+        if(sender == &ipGrabber[i])
+        {
+            std::stringstream ss;
             ss << "videoResized: ";
             ss << "Camera connected to: " << ipGrabber[i]->getURI() + " ";
             ss << "New DIM = " << arg.width << "/" << arg.height;
-            ofLogVerbose("testApp") << ss.str();
+            ofLogVerbose("ofApp") << ss.str();
         }
     }
 }
 
 
-//--------------------------------------------------------------
-void testApp::update(){
+//------------------------------------------------------------------------------
+void ofApp::update()
+{
     // update the cameras
-    for(size_t i = 0; i < ipGrabber.size(); i++) {
+    for(std::size_t i = 0; i < ipGrabber.size(); i++)
+    {
         ipGrabber[i]->update();
     }
 }
 
-//--------------------------------------------------------------
-void testApp::draw(){
+//------------------------------------------------------------------------------
+void ofApp::draw(){
 	ofBackground(0,0,0);
 
 	ofSetHexColor(0xffffff);
@@ -138,13 +170,16 @@ void testApp::draw(){
     float totalKbps = 0;
     float totalFPS = 0;
     
-    for(size_t i = 0; i < ipGrabber.size(); i++) {
+    for(std::size_t i = 0; i < ipGrabber.size(); i++)
+    {
         x = col * w;
         y = row * h;
 
         // draw in a grid
         row = (row + 1) % NUM_ROWS;
-        if(row == 0) {
+
+        if(row == 0)
+        {
             col = (col + 1) % NUM_COLS;
         }
 
@@ -166,8 +201,7 @@ void testApp::draw(){
         float fps = ipGrabber[i]->getFrameRate();
         totalFPS+=fps;
         
-        
-        stringstream ss;
+        std::stringstream ss;
         
         // ofToString formatting available in 0072+
         ss << "          NAME: " << ipGrabber[i]->getCameraName() << endl;
@@ -185,7 +219,6 @@ void testApp::draw(){
 
         ofSetColor(255);
         ofDrawBitmapString(ss.str(), 10, 10+12);
-        
         
         ofDisableAlphaBlending();
         
@@ -209,61 +242,24 @@ void testApp::draw(){
 
 }
 
-//--------------------------------------------------------------
-void testApp::keyPressed  (int key){
-    if(key == ' ') {
+//------------------------------------------------------------------------------
+void ofApp::keyPressed(int key)
+{
+    if(key == ' ')
+    {
         // initialize connection
-        for(int i = 0; i < NUM_CAMERAS; i++) {
-            ofRemoveListener(ipGrabber[i]->videoResized, this, &testApp::videoResized);
-            ofxSharedIpVideoGrabber c( new ofxIpVideoGrabber());
+        for(std::size_t i = 0; i < NUM_CAMERAS; i++)
+        {
+            ofRemoveListener(ipGrabber[i]->videoResized, this, &ofApp::videoResized);
+            ofxSharedIpVideoGrabber c(new ofxIpVideoGrabber());
             IPCameraDef& cam = getNextCamera();
             c->setUsername(cam.username);
             c->setPassword(cam.password);
-            URI uri(cam.url);
+            Poco::URI uri(cam.url);
             c->setURI(uri);
             c->connect();
             
             ipGrabber[i] = c;
-            
         }
     }
-}
-
-//--------------------------------------------------------------
-void testApp::keyReleased(int key){
-
-}
-
-//--------------------------------------------------------------
-void testApp::mouseMoved(int x, int y ){
-}
-
-//--------------------------------------------------------------
-void testApp::mouseDragged(int x, int y, int button){
-
-}
-
-//--------------------------------------------------------------
-void testApp::mousePressed(int x, int y, int button){
-
-}
-
-//--------------------------------------------------------------
-void testApp::mouseReleased(int x, int y, int button){
-
-}
-
-//--------------------------------------------------------------
-void testApp::windowResized(int w, int h){
-
-}
-
-//--------------------------------------------------------------
-void testApp::gotMessage(ofMessage msg){
-
-}
-
-//--------------------------------------------------------------
-void testApp::dragEvent(ofDragInfo dragInfo){ 
-
 }
