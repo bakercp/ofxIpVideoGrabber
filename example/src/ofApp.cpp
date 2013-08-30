@@ -34,7 +34,7 @@ void ofApp::setup()
     loadCameras();
     
     // initialize connection
-    for(int i = 0; i < NUM_CAMERAS; i++)
+    for(std::size_t i = 0; i < NUM_CAMERAS; i++)
     {
         IPCameraDef& cam = getNextCamera();
         
@@ -125,7 +125,7 @@ void ofApp::loadCameras()
 }
 
 //------------------------------------------------------------------------------
-void ofApp::videoResized(const void * sender, ofResizeEventArgs& arg)
+void ofApp::videoResized(const void* sender, ofResizeEventArgs& arg)
 {
     // find the camera that sent the resize event changed
     for(std::size_t i = 0; i < NUM_CAMERAS; i++)

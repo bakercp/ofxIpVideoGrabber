@@ -49,7 +49,7 @@ public:
     {
     }
 
-    IPCameraDef(const string& _url): url(_url)
+    IPCameraDef(const std::string& _url): url(_url)
     {
     }
     
@@ -79,7 +79,7 @@ public:
     
     void keyPressed(int key);
 
-    vector<ofxSharedIpVideoGrabber> ipGrabber;
+    std::vector<ofxSharedIpVideoGrabber> ipGrabber;
 
     void loadCameras();
     IPCameraDef& getNextCamera();
