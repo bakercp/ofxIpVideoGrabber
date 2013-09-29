@@ -31,7 +31,7 @@
 		E7E077E515D3B63C0020DFD4 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E7E077E415D3B63C0020DFD4 /* CoreVideo.framework */; };
 		E7E077E815D3B6510020DFD4 /* QTKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E7E077E715D3B6510020DFD4 /* QTKit.framework */; };
 		E7F985F815E0DEA3003869B5 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E7F985F515E0DE99003869B5 /* Accelerate.framework */; };
-		a6fd5d9dc036c86e705952acd3b00f12 /* ofxIpVideoGrabber.cpp in Sources */ = {isa = PBXBuildFile; fileRef = dfbbf3b13792577c20a324ae95eb6fcb /* ofxIpVideoGrabber.cpp */; };
+		a6fd5d9dc036c86e705952acd3b00f12 /* IPVideoGrabber.cpp in Sources */ = {isa = PBXBuildFile; fileRef = dfbbf3b13792577c20a324ae95eb6fcb /* IPVideoGrabber.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -66,7 +66,7 @@
 
 /* Begin PBXFileReference section */
 		01dcc0911400f9acf5b65578af4ec8f9 /* ofxXmlSettings.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = ofxXmlSettings.h; path = ../../../addons/ofxXmlSettings/src/ofxXmlSettings.h; sourceTree = SOURCE_ROOT; };
-		21af562e55cf8d85704fa825ecc3b096 /* ofxIpVideoGrabber.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = ofxIpVideoGrabber.h; path = ../../../addons/ofxIpVideoGrabber/src/ofxIpVideoGrabber.h; sourceTree = SOURCE_ROOT; };
+		21af562e55cf8d85704fa825ecc3b096 /* IPVideoGrabber.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = IPVideoGrabber.h; path = ../../../addons/ofxIpVideoGrabber/src/IPVideoGrabber.h; sourceTree = SOURCE_ROOT; };
 		2b40eda85beb63e46785bc299a638898 /* tinyxml.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = tinyxml.cpp; path = ../../../addons/ofxXmlSettings/libs/tinyxml.cpp; sourceTree = SOURCE_ROOT; };
 		50df87d612c5aae17aafa6c02c6bc570 /* ofxXmlSettings.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = ofxXmlSettings.cpp; path = ../../../addons/ofxXmlSettings/src/ofxXmlSettings.cpp; sourceTree = SOURCE_ROOT; };
 		832bdc407620cdba568b713d2252c43c /* tinyxmlerror.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = tinyxmlerror.cpp; path = ../../../addons/ofxXmlSettings/libs/tinyxmlerror.cpp; sourceTree = SOURCE_ROOT; };
@@ -95,7 +95,7 @@
 		E7E077E715D3B6510020DFD4 /* QTKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QTKit.framework; path = /System/Library/Frameworks/QTKit.framework; sourceTree = "<absolute>"; };
 		E7F985F515E0DE99003869B5 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = /System/Library/Frameworks/Accelerate.framework; sourceTree = "<absolute>"; };
 		b21e7e5f548eea92f368040bb1aa2f69 /* tinyxml.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = tinyxml.h; path = ../../../addons/ofxXmlSettings/libs/tinyxml.h; sourceTree = SOURCE_ROOT; };
-		dfbbf3b13792577c20a324ae95eb6fcb /* ofxIpVideoGrabber.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = ofxIpVideoGrabber.cpp; path = ../../../addons/ofxIpVideoGrabber/src/ofxIpVideoGrabber.cpp; sourceTree = SOURCE_ROOT; };
+		dfbbf3b13792577c20a324ae95eb6fcb /* IPVideoGrabber.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = IPVideoGrabber.cpp; path = ../../../addons/ofxIpVideoGrabber/src/IPVideoGrabber.cpp; sourceTree = SOURCE_ROOT; };
 		fc5da1c87211d4f6377da7199d8c5a1e /* tinyxmlparser.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = tinyxmlparser.cpp; path = ../../../addons/ofxXmlSettings/libs/tinyxmlparser.cpp; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
@@ -255,8 +255,8 @@
 		d9736faedf24c405d46ca701db84fc3b /* src */ = {
 			isa = PBXGroup;
 			children = (
-				dfbbf3b13792577c20a324ae95eb6fcb /* ofxIpVideoGrabber.cpp */,
-				21af562e55cf8d85704fa825ecc3b096 /* ofxIpVideoGrabber.h */,
+				dfbbf3b13792577c20a324ae95eb6fcb /* IPVideoGrabber.cpp */,
+				21af562e55cf8d85704fa825ecc3b096 /* IPVideoGrabber.h */,
 			);
 			name = src;
 			sourceTree = "<group>";
@@ -347,7 +347,7 @@
 			files = (
 				E4B69E200A3A1BDC003C02F2 /* main.cpp in Sources */,
 				E4B69E210A3A1BDC003C02F2 /* ofApp.cpp in Sources */,
-				a6fd5d9dc036c86e705952acd3b00f12 /* ofxIpVideoGrabber.cpp in Sources */,
+				a6fd5d9dc036c86e705952acd3b00f12 /* IPVideoGrabber.cpp in Sources */,
 				63b57ac5bf4ef088491e0317dbb2ecaa /* ofxXmlSettings.cpp in Sources */,
 				933a2227713c720ceff80fd967d0a8ee /* tinyxml.cpp in Sources */,
 				9d44dc88ef9e7991b4a09951e2e4769f /* tinyxmlerror.cpp in Sources */,
