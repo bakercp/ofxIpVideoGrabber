@@ -47,20 +47,23 @@
 #include "Poco/Net/NetException.h"
 
 
-class ofxIpVideoGrabber: public ofBaseVideoDraws, protected ofThread
+namespace ofx {
+namespace Video {
+
+
+class IPVideoGrabber: public ofBaseVideoDraws, protected ofThread
 {
 public:
-    typedef std::shared_ptr<ofxIpVideoGrabber> Ptr;
-    typedef Poco::FastMutex::ScopedLock ofScopedLock;
+    typedef std::shared_ptr<IPVideoGrabber> SharedPtr;
     
-    ofxIpVideoGrabber();
-    virtual ~ofxIpVideoGrabber();
-    
-    void exit(ofEventArgs & a);
+    IPVideoGrabber();
+    virtual ~IPVideoGrabber();
+
+    void exit(ofEventArgs& a);
 
     void update();
     
-    void update(ofEventArgs & a);
+    void update(ofEventArgs& a);
 
     void connect();
     void disconnect();
@@ -68,6 +71,7 @@ public:
 
     // ofBaseVideo
 	bool isFrameNew();
+	bool isFrameNew() const;
 	void close();
     
     void reset();
@@ -83,10 +87,10 @@ public:
 	void setUseTexture(bool bUseTex);
 
     // ofBaseDraws
-    void draw(float x,float y);
-	void draw(float x,float y,float w, float h);
-	void draw(const ofPoint & point);
-	void draw(const ofRectangle & rect);
+    void draw(float x, float y);
+	void draw(float x, float y, float w, float h);
+	void draw(const ofPoint& point);
+	void draw(const ofRectangle& rect);
     
     void setAnchorPercent(float xPct, float yPct);
     void setAnchorPoint(float x, float y);
@@ -164,14 +168,17 @@ public:
     std::string getDefaultBoundaryMarker(); // const;
         
     ofEvent<ofResizeEventArgs> 	videoResized;
-    
+
+    static SharedPtr makeShared()
+    {
+        return SharedPtr(new IPVideoGrabber());
+    }
+
 protected:    
     void threadedFunction(); // connect to server
     void imageResized(int width, int height);
     
-    
-private: 
-
+private:
     std::string defaultBoundaryMarker_a;
     
     std::string cameraName_a;
@@ -228,4 +235,7 @@ private:
 };
 
 
-typedef ofxIpVideoGrabber::Ptr ofxSharedIpVideoGrabber;
+typedef IPVideoGrabber::SharedPtr SharedIPVideoGrabber;
+
+
+} } // namespace ofx::Video
