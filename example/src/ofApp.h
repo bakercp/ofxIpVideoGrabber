@@ -28,7 +28,7 @@
 
 #include "ofMain.h"
 #include "ofxXmlSettings.h"
-#include "ofxIpVideoGrabber.h"
+#include "IPVideoGrabber.h"
 
 
 #if defined(TARGET_OF_IPHONE) || defined(TARGET_ANDROID) || defined(TARGET_LINUX_ARM)
@@ -49,26 +49,45 @@ public:
     {
     }
 
-    IPCameraDef(const std::string& _url): url(_url)
+    IPCameraDef(const std::string& url): _url(url)
     {
     }
     
-    IPCameraDef(const std::string& _name,
-                const std::string& _url,
-                const std::string& _username,
-                const std::string& _password):
-        name(_name),
-        url(_url),
-        username(_username),
-        password(_password)
+    IPCameraDef(const std::string& name,
+                const std::string& url,
+                const std::string& username,
+                const std::string& password):
+        _name(name),
+        _url(url),
+        _username(username),
+        _password(password)
     {
     }
-    
-    std::string name;
-    std::string url;
-    std::string username;
-    std::string password;
+
+    void setName(const std::string& name) { _name = name; }
+    std::string getName() const { return _name; }
+
+    void setURL(const std::string& url) { _url = url; }
+    std::string getURL() const { return _url; }
+
+    void setUsername(const std::string& username) { _username = username; }
+    std::string getUsername() const { return _username; }
+
+    void setPassword(const std::string& password) { _password = password; }
+    std::string getPassword() const { return _password; }
+
+
+private:
+    std::string _name;
+    std::string _url;
+    std::string _username;
+    std::string _password;
 };
+
+
+using ofx::Video::IPVideoGrabber;
+using ofx::Video::SharedIPVideoGrabber;
+
 
 class ofApp: public ofBaseApp
 {
@@ -79,7 +98,7 @@ public:
     
     void keyPressed(int key);
 
-    std::vector<ofxSharedIpVideoGrabber> ipGrabber;
+    std::vector<SharedIPVideoGrabber> grabbers;
 
     void loadCameras();
     IPCameraDef& getNextCamera();

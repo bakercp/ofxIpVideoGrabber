@@ -38,7 +38,7 @@ void ofApp::setup()
     {
         IPCameraDef& cam = getNextCamera();
         
-        ofxSharedIpVideoGrabber c( new ofxIpVideoGrabber());
+        SharedIPVideoGrabber c = IPVideoGrabber::makeShared();
 
         // if your camera uses standard web-based authentication, use this
         // c->setUsername(cam.username);
@@ -48,14 +48,14 @@ void ofApp::setup()
         // c->setCookie("user", cam.username);
         // c->setCookie("password", cam.password);
         
-        c->setCameraName(cam.name);
-        c->setURI(cam.url);
+        c->setCameraName(cam.getName());
+        c->setURI(cam.getURL());
         c->connect(); // connect immediately
 
         // if desired, set up a video resize listener
         ofAddListener(c->videoResized, this, &ofApp::videoResized);
         
-        ipGrabber.push_back(c);
+        grabbers.push_back(c);
 
     }
 }
@@ -93,19 +93,18 @@ void ofApp::loadCameras()
 		for(std::size_t n = 0; n < nCams; n++)
         {
             
-            IPCameraDef def;
+            IPCameraDef def(XML.getAttribute(tag, "name", "", n),
+                            XML.getAttribute(tag, "url", "", n),
+                            XML.getAttribute(tag, "username", "", n),
+                            XML.getAttribute(tag, "password", "", n));
 
-			def.name = XML.getAttribute(tag, "name", "", n);
-			def.url = XML.getAttribute(tag, "url", "", n);
-			def.username = XML.getAttribute(tag, "username", "", n);
-			def.password = XML.getAttribute(tag, "password", "", n);
-			
-            std::string logMessage = "STREAM LOADED: " + def.name +
-			" url: " +  def.url +
-			" username: " + def.username +
-			" password: " + def.password;
+
+            std::string logMessage = "STREAM LOADED: " + def.getName() +
+			" url: " +  def.getURL() +
+			" username: " + def.getUsername() +
+			" password: " + def.getPassword();
             
-            ofLog(OF_LOG_NOTICE, logMessage);
+            ofLogNotice() << logMessage;
             
             ipcams.push_back(def);
             
@@ -130,11 +129,11 @@ void ofApp::videoResized(const void* sender, ofResizeEventArgs& arg)
     // find the camera that sent the resize event changed
     for(std::size_t i = 0; i < NUM_CAMERAS; i++)
     {
-        if(sender == &ipGrabber[i])
+        if(sender == &grabbers[i])
         {
             std::stringstream ss;
             ss << "videoResized: ";
-            ss << "Camera connected to: " << ipGrabber[i]->getURI() + " ";
+            ss << "Camera connected to: " << grabbers[i]->getURI() + " ";
             ss << "New DIM = " << arg.width << "/" << arg.height;
             ofLogVerbose("ofApp") << ss.str();
         }
@@ -146,9 +145,9 @@ void ofApp::videoResized(const void* sender, ofResizeEventArgs& arg)
 void ofApp::update()
 {
     // update the cameras
-    for(std::size_t i = 0; i < ipGrabber.size(); i++)
+    for(std::size_t i = 0; i < grabbers.size(); i++)
     {
-        ipGrabber[i]->update();
+        grabbers[i]->update();
     }
 }
 
@@ -170,7 +169,7 @@ void ofApp::draw(){
     float totalKbps = 0;
     float totalFPS = 0;
     
-    for(std::size_t i = 0; i < ipGrabber.size(); i++)
+    for(std::size_t i = 0; i < grabbers.size(); i++)
     {
         x = col * w;
         y = row * h;
@@ -187,7 +186,7 @@ void ofApp::draw(){
         ofPushMatrix();
         ofTranslate(x,y);
         ofSetColor(255,255,255,255);
-        ipGrabber[i]->draw(0,0,w,h); // draw the camera
+        grabbers[i]->draw(0,0,w,h); // draw the camera
         
         ofEnableAlphaBlending();
         
@@ -195,27 +194,27 @@ void ofApp::draw(){
         ofSetColor(0,80);
         ofRect(5,5,w-10,h-10);
         
-        float kbps = ipGrabber[i]->getBitRate() / 1000.0f; // kilobits / second, not kibibits / second
+        float kbps = grabbers[i]->getBitRate() / 1000.0f; // kilobits / second, not kibibits / second
         totalKbps+=kbps;
         
-        float fps = ipGrabber[i]->getFrameRate();
+        float fps = grabbers[i]->getFrameRate();
         totalFPS+=fps;
         
         std::stringstream ss;
         
         // ofToString formatting available in 0072+
-        ss << "          NAME: " << ipGrabber[i]->getCameraName() << endl;
-        ss << "          HOST: " << ipGrabber[i]->getHost() << endl;
+        ss << "          NAME: " << grabbers[i]->getCameraName() << endl;
+        ss << "          HOST: " << grabbers[i]->getHost() << endl;
         ss << "           FPS: " << ofToString(fps,  2/*,13,' '*/) << endl;
         ss << "          Kb/S: " << ofToString(kbps, 2/*,13,' '*/) << endl;
-        ss << " #Bytes Recv'd: " << ofToString(ipGrabber[i]->getNumBytesReceived(),  0/*,10,' '*/) << endl;
-        ss << "#Frames Recv'd: " << ofToString(ipGrabber[i]->getNumFramesReceived(), 0/*,10,' '*/) << endl;
-        ss << "Auto Reconnect: " << (ipGrabber[i]->getAutoReconnect() ? "YES" : "NO") << endl;
-        ss << " Needs Connect: " << (ipGrabber[i]->getNeedsReconnect() ? "YES" : "NO") << endl;
-        ss << "Time Till Next: " << ipGrabber[i]->getTimeTillNextAutoRetry() << " ms" << endl;
-        ss << "Num Reconnects: " << ofToString(ipGrabber[i]->getReconnectCount()) << endl;
-        ss << "Max Reconnects: " << ofToString(ipGrabber[i]->getMaxReconnects()) << endl;
-        ss << "  Connect Fail: " << (ipGrabber[i]->hasConnectionFailed() ? "YES" : "NO");
+        ss << " #Bytes Recv'd: " << ofToString(grabbers[i]->getNumBytesReceived(),  0/*,10,' '*/) << endl;
+        ss << "#Frames Recv'd: " << ofToString(grabbers[i]->getNumFramesReceived(), 0/*,10,' '*/) << endl;
+        ss << "Auto Reconnect: " << (grabbers[i]->getAutoReconnect() ? "YES" : "NO") << endl;
+        ss << " Needs Connect: " << (grabbers[i]->getNeedsReconnect() ? "YES" : "NO") << endl;
+        ss << "Time Till Next: " << grabbers[i]->getTimeTillNextAutoRetry() << " ms" << endl;
+        ss << "Num Reconnects: " << ofToString(grabbers[i]->getReconnectCount()) << endl;
+        ss << "Max Reconnects: " << ofToString(grabbers[i]->getMaxReconnects()) << endl;
+        ss << "  Connect Fail: " << (grabbers[i]->hasConnectionFailed() ? "YES" : "NO");
 
         ofSetColor(255);
         ofDrawBitmapString(ss.str(), 10, 10+12);
@@ -250,16 +249,16 @@ void ofApp::keyPressed(int key)
         // initialize connection
         for(std::size_t i = 0; i < NUM_CAMERAS; i++)
         {
-            ofRemoveListener(ipGrabber[i]->videoResized, this, &ofApp::videoResized);
-            ofxSharedIpVideoGrabber c(new ofxIpVideoGrabber());
+            ofRemoveListener(grabbers[i]->videoResized, this, &ofApp::videoResized);
+            SharedIPVideoGrabber c = IPVideoGrabber::makeShared();
             IPCameraDef& cam = getNextCamera();
-            c->setUsername(cam.username);
-            c->setPassword(cam.password);
-            Poco::URI uri(cam.url);
+            c->setUsername(cam.getUsername());
+            c->setPassword(cam.getPassword());
+            Poco::URI uri(cam.getURL());
             c->setURI(uri);
             c->connect();
             
-            ipGrabber[i] = c;
+            grabbers[i] = c;
         }
     }
 }
