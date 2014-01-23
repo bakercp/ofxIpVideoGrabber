@@ -78,7 +78,8 @@ public:
 
     // ofBaseHasPixels
 	unsigned char* getPixels();
-	ofPixelsRef getPixelsRef();
+    ofPixelsRef getPixelsRef();
+    const ofPixelsRef getPixelsRef() const;
     
     std::shared_ptr<ofImage> getFrame();
     
@@ -229,8 +230,6 @@ private:
     Poco::URI uri_a;
     
     Poco::Net::NameValueCollection cookies;
-
-//    mutable Poco::FastMutex myMutex;
 
 };
 
