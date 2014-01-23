@@ -28,7 +28,7 @@ The addon should sit in `openFrameworks/addons/ofxIpVideoGrabber/`.
 
 #### Which version to use?
 
-ofxIpVideoGrabber has been tested with the latest development version of Open Frameworks and back to at least 0071.
+ofxIpVideoGrabber has been tested with the latest development version of Open Frameworks including 0.8.0.
 
 The master branch should be is stable.  New features, etc are in the `develop` branch.
 
