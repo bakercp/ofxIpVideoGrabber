@@ -53,12 +53,12 @@ IPVideoGrabber::IPVideoGrabber(): ofBaseVideoDraws(), ofThread()
     ci = 0; // current index
     
     // prepare the double buffer
-    for(int i = 0; i < 2; i++) {
+    for(std::size_t i = 0; i < 2; i++) {
         // we only load pixel data b/c tex allocation can only happen in main thread
         image_a[i].setUseTexture(false);
     }
     
-    img = ofPtr<ofImage>(new ofImage());
+    img = std::shared_ptr<ofImage>(new ofImage());
     img->allocate(1,1, OF_IMAGE_COLOR); // allocate something so it won't throw errors
     img->setColor(0,0,ofColor(0));
     
@@ -199,7 +199,7 @@ void IPVideoGrabber::update()
             
             // get a pixel ref for the image that was just loaded in the thread
             
-            img = ofPtr<ofImage>(new ofImage());
+            img = std::shared_ptr<ofImage>(new ofImage());
             img->setFromPixels(image_a[ci].getPixelsRef());
             
             isNewFrameLoaded = true; // we only set this to true.  this setup is analogous to
@@ -283,7 +283,7 @@ void IPVideoGrabber::connect()
         currentBitRate   = 0.0;
         currentFrameRate = 0.0;
 
-        startThread(true, false);   // blocking, verbose
+        startThread(true);   // blocking, verbose
     }
     else
     {
@@ -490,6 +490,7 @@ void IPVideoGrabber::threadedFunction()
     if(path.empty()) path = "/";
 
     // create our header request
+    // TODO: add SSL via ofxSSL
     Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_GET, path, Poco::Net::HTTPMessage::HTTP_1_1); // 1.1 for persistent connections
 
     // do basic access authentication if needed
@@ -738,6 +739,12 @@ unsigned char* IPVideoGrabber::getPixels()
 
 //------------------------------------------------------------------------------
 ofPixelsRef IPVideoGrabber::getPixelsRef()
+{
+    return img->getPixelsRef();
+}
+
+//------------------------------------------------------------------------------
+const ofPixelsRef IPVideoGrabber::getPixelsRef() const
 {
     return img->getPixelsRef();
 }
@@ -994,8 +1001,9 @@ Poco::URI IPVideoGrabber::getPocoURI()
 //------------------------------------------------------------------------------
 void IPVideoGrabber::setURI(const std::string& _uri)
 {
-    ofScopedLock lock(mutex);
+    mutex.lock();
     uri_a = Poco::URI(_uri);
+    mutex.unlock();
     if(isThreadRunning()) {
         ofLogWarning("IPVideoGrabber") << "Session currently active.  New URI will be applied on the next connection.";
     }
@@ -1004,8 +1012,10 @@ void IPVideoGrabber::setURI(const std::string& _uri)
 //------------------------------------------------------------------------------
 void IPVideoGrabber::setURI(const Poco::URI& _uri)
 {
-    ofScopedLock lock(mutex);
+    mutex.lock();
     uri_a = _uri;
+    mutex.unlock();
+
     if(isThreadRunning())
     {
         ofLogWarning("IPVideoGrabber") << "Session currently active.  New URI will be applied on the next connection.";

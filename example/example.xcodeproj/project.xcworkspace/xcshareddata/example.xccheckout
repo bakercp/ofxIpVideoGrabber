@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>9BAC6EED-C7AF-4ECC-9A33-883606996050</string>
+	<key>IDESourceControlProjectName</key>
+	<string>example</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>698A1A4A-7923-48F4-BF12-D6A1075A3D92</key>
+		<string>ssh://github.com/bakercp/openFrameworks.git</string>
+		<key>EED8C02B-9FCA-4C3A-9E8D-45EF7B59103A</key>
+		<string>ssh://github.com/bakercp/ofxIpVideoGrabber.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>addons/ofxIpVideoGrabber/example/example.xcodeproj/project.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>698A1A4A-7923-48F4-BF12-D6A1075A3D92</key>
+		<string>../../../../..</string>
+		<key>EED8C02B-9FCA-4C3A-9E8D-45EF7B59103A</key>
+		<string>../../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>ssh://github.com/bakercp/ofxIpVideoGrabber.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>110</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>698A1A4A-7923-48F4-BF12-D6A1075A3D92</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>EED8C02B-9FCA-4C3A-9E8D-45EF7B59103A</string>
+			<key>IDESourceControlWCCName</key>
+			<string>ofxIpVideoGrabber</string>
+		</dict>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>698A1A4A-7923-48F4-BF12-D6A1075A3D92</string>
+			<key>IDESourceControlWCCName</key>
+			<string>openFrameworks</string>
+		</dict>
+	</array>
+</dict>
+</plist>
