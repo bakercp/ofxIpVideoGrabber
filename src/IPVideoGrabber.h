@@ -221,7 +221,7 @@ private:
     unsigned long nextAutoRetry_a;
     bool connectionFailure; // max reconnects exceeded, is dead.
     bool needsReconnect_a; // needs reconnecting
-    bool autoReconnect;  // shoudl automatically reconnect
+    bool autoReconnect;  // should automatically reconnect
     unsigned long reconnectCount_a; // the number of reconnects attempted
     unsigned long maxReconnects;  // the maximum number of reconnect attempts that will be made
 
