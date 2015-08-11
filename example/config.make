@@ -6,20 +6,9 @@
 ################################################################################
 # OF ROOT
 #   The location of your root openFrameworks installation
-#       (default) PATH_OF_ROOT = ../../.. 
+#       (default) OF_ROOT = ../../.. 
 ################################################################################
-# PATH_OF_ROOT = ../../..
-
-################################################################################
-# App Name
-# 	Custom Application Name
-#       (default) APPNAME = (this project's folder name)
-# App Name Suffix
-#       (default) APPNAME_SUFFIX = .app
-#
-################################################################################
-# APPNAME = customAppName
-# APPNAME_SUFFIX = .app
+# OF_ROOT = ../../..
 
 ################################################################################
 # PROJECT ROOT

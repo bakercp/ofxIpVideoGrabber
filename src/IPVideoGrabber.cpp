@@ -46,67 +46,41 @@ static char SOI = 0xD8;
 static char EOI = 0xD9;
 
 
-//------------------------------------------------------------------------------
-IPVideoGrabber::IPVideoGrabber(): ofBaseVideoDraws(), ofThread()
+
+IPVideoGrabber::IPVideoGrabber():
+	ci(0),
+	img(std::make_shared<ofImage>()),
+	isNewFrameLoaded(false),
+	isBackBufferReady_a(false),
+	cameraName_a(""),
+	sessionTimeout(2000), // ms
+	reconnectTimeout(5000),
+	lastValidBitrateTime(0),
+	currentBitRate(0.0),
+	currentFrameRate(0.0),
+	connectTime_a(0),
+	elapsedTime_a(0),
+	nBytes_a(0),
+	nFrames_a(0),
+	minBitrate(8),
+	connectionFailure(false),
+	needsReconnect_a(false),
+	autoReconnect(true),
+	reconnectCount_a(0),
+	maxReconnects(20),
+	autoRetryDelay_a(1000), // at least 1 second retry delay
+	nextAutoRetry_a(0),
+	bUseProxy_a(false),
+	proxyUsername_a(""),
+	proxyPassword_a(""),
+	proxyHost_a("127.0.0.1"),
+	proxyPort_a(Poco::Net::HTTPSession::HTTP_PORT),
+	defaultBoundaryMarker_a("--myboundary")
 {
 
-    ci = 0; // current index
-    
-    // prepare the double buffer
-    for(std::size_t i = 0; i < 2; i++) {
-        // we only load pixel data b/c tex allocation can only happen in main thread
-        image_a[i].setUseTexture(false);
-    }
-    
-    img = std::shared_ptr<ofImage>(new ofImage());
     img->allocate(1,1, OF_IMAGE_COLOR); // allocate something so it won't throw errors
     img->setColor(0,0,ofColor(0));
-    
-    isNewFrameLoaded  = false;
-    isBackBufferReady_a = false;
-    
-    cameraName_a = "";
-    
-    sessionTimeout = 2000; // ms
-    
-    reconnectTimeout = 5000;
-    
-    // stats
-    lastValidBitrateTime = 0;
-    
-    currentBitRate   = 0.0;
-    currentFrameRate = 0.0;
-    
-    connectTime_a = 0;
-    elapsedTime_a = 0;
-    nBytes_a      = 0;
-    nFrames_a     = 0;
-    
-    needsReconnect_a = false;
-    // stats
-    
-    minBitrate = 8;
 
-    connectionFailure = false;
-    needsReconnect_a = false;
-    autoReconnect  = true;
-    
-    reconnectCount_a = 0;
-    maxReconnects = 20;
-    
-    autoRetryDelay_a = 1000; // at least 1 second retry delay
-    nextAutoRetry_a = 0;
-
-    bUseProxy_a = false;
-    proxyUsername_a = "";
-    proxyPassword_a = "";
-    proxyHost_a = "127.0.0.1";
-    proxyPort_a = Poco::Net::HTTPSession::HTTP_PORT;
-    
-    // AXIS default (--myboundary)
-    // other cameras have other odd boundaries
-    defaultBoundaryMarker_a = "--myboundary";
-    
     // THIS IS EXTREMELY IMPORTANT.
     // To shut down the thread cleanly, we cannot allow openFrameworks to de-init FreeImage
     // before this thread has completed any current image loads.  Thus we need to make sure
@@ -120,7 +94,7 @@ IPVideoGrabber::IPVideoGrabber(): ofBaseVideoDraws(), ofThread()
     ofAddListener(ofEvents().exit,this,&IPVideoGrabber::exit);
 }
 
-//------------------------------------------------------------------------------
+
 IPVideoGrabber::~IPVideoGrabber()
 {
     // N.B. In most cases, IPVideoGrabber::exit() will be called before
@@ -134,20 +108,20 @@ IPVideoGrabber::~IPVideoGrabber()
     ofRemoveListener(ofEvents().exit,this,&IPVideoGrabber::exit);
 }
 
-//------------------------------------------------------------------------------
+
 void IPVideoGrabber::exit(ofEventArgs & a) {
     ofLogVerbose("IPVideoGrabber") << "exit() called on [" << getCameraName() << "] -- cleaning up and exiting.";
     waitForDisconnect();
     ofRemoveListener(ofEvents().exit,this,&IPVideoGrabber::exit);
 }
 
-//------------------------------------------------------------------------------
+
 void IPVideoGrabber::update(ofEventArgs& a)
 {
     update();
 }
 
-//------------------------------------------------------------------------------
+
 void IPVideoGrabber::update()
 {
         
@@ -199,8 +173,8 @@ void IPVideoGrabber::update()
             
             // get a pixel ref for the image that was just loaded in the thread
             
-            img = std::shared_ptr<ofImage>(new ofImage());
-            img->setFromPixels(image_a[ci].getPixelsRef());
+            img = std::make_shared<ofImage>();
+            img->setFromPixels(image_a[ci]);
             
             isNewFrameLoaded = true; // we only set this to true.  this setup is analogous to
                                      // has new pixels in ofVideo
@@ -271,7 +245,7 @@ void IPVideoGrabber::update()
     
 }
 
-//------------------------------------------------------------------------------
+
 void IPVideoGrabber::connect()
 {
     if(!isConnected())
@@ -291,7 +265,7 @@ void IPVideoGrabber::connect()
     }
 }
 
-//------------------------------------------------------------------------------
+
 void IPVideoGrabber::waitForDisconnect()
 {
     if(isConnected())
@@ -300,7 +274,7 @@ void IPVideoGrabber::waitForDisconnect()
     }
 }
 
-//------------------------------------------------------------------------------
+
 void IPVideoGrabber::disconnect()
 {
     if(isConnected())
@@ -313,13 +287,13 @@ void IPVideoGrabber::disconnect()
     }
 }
 
-//------------------------------------------------------------------------------
+
 void IPVideoGrabber::close()
 {
     disconnect();
 }
 
-//------------------------------------------------------------------------------
+
 void IPVideoGrabber::reset()
 {
     mutex.lock();
@@ -329,78 +303,78 @@ void IPVideoGrabber::reset()
     waitForDisconnect();
 }
 
-//------------------------------------------------------------------------------
+
 bool IPVideoGrabber::isConnected()
 {
     return isThreadRunning();
 }
 
-//------------------------------------------------------------------------------
+
 bool IPVideoGrabber::hasConnectionFailed() const
 {
     return connectionFailure;
 }
 
-//------------------------------------------------------------------------------
+
 unsigned long IPVideoGrabber::getReconnectTimeout() const
 {
     return reconnectTimeout;
 }
 
-//------------------------------------------------------------------------------
+
 bool IPVideoGrabber::getNeedsReconnect()
 {
     ofScopedLock lock(mutex);
     return needsReconnect_a;
 }
 
-//------------------------------------------------------------------------------
+
 bool IPVideoGrabber::getAutoReconnect() const
 {
     return autoReconnect;
 }
 
-//------------------------------------------------------------------------------
+
 unsigned long IPVideoGrabber::getReconnectCount()
 {
     ofScopedLock lock(mutex);
     return reconnectCount_a;
 }
 
-//------------------------------------------------------------------------------
+
 unsigned long IPVideoGrabber::getMaxReconnects() const
 {
     return maxReconnects;
 }
 
-//------------------------------------------------------------------------------
+
 void IPVideoGrabber::setMaxReconnects(unsigned long num)
 {
     maxReconnects = num;
 }
 
-//------------------------------------------------------------------------------
+
 unsigned long IPVideoGrabber::getAutoRetryDelay()
 {
     ofScopedLock lock(mutex);
     return autoRetryDelay_a;
 }
 
-//------------------------------------------------------------------------------
+
 void IPVideoGrabber::setAutoRetryDelay(unsigned long delay_ms)
 {
     ofScopedLock lock(mutex);
     autoRetryDelay_a = delay_ms;
 }
 
-//------------------------------------------------------------------------------
+
 unsigned long IPVideoGrabber::getNextAutoRetryTime()
 {
     ofScopedLock lock(mutex);
     return nextAutoRetry_a;
 }
 
-//------------------------------------------------------------------------------
+
 unsigned long IPVideoGrabber::getTimeTillNextAutoRetry()
 {
     ofScopedLock lock(mutex);
@@ -414,7 +388,7 @@ unsigned long IPVideoGrabber::getTimeTillNextAutoRetry()
     }
 }
 
-//------------------------------------------------------------------------------
+
 void IPVideoGrabber::setDefaultBoundaryMarker(const std::string& _defaultBoundaryMarker)
 {
     ofScopedLock lock(mutex);
@@ -425,14 +399,14 @@ void IPVideoGrabber::setDefaultBoundaryMarker(const std::string& _defaultBoundar
     }
 }
 
-//------------------------------------------------------------------------------
+
 std::string IPVideoGrabber::getDefaultBoundaryMarker()
 {
     ofScopedLock lock(mutex);
     return defaultBoundaryMarker_a;
 }
 
-//------------------------------------------------------------------------------
+
 void IPVideoGrabber::threadedFunction()
 {
     
@@ -640,9 +614,20 @@ void IPVideoGrabber::threadedFunction()
                                 mutex.lock();     // LOCKING //
                                 ///////////////////////////////
 
+								std::string fn = ofGetTimestampString() + ".jpg";
+
+								ofBufferToFile(fn, buffer);
+
+								ofPixels pix;
+
+								cout << "here" << endl;
+
+								bool result = ofLoadImage(pix, fn);
+
                                 // get the back image (ci^1)
-                                if(image_a[ci^1].loadImage(buffer))
+                                if(result)
                                 {
+									image_a[ci^1] = pix;
                                     isBackBufferReady_a = true;
                                     nFrames_a++; // incrase frame cout
                                 }
@@ -719,67 +704,101 @@ void IPVideoGrabber::threadedFunction()
     // fall off the end of the loop ...
 }
 
-//------------------------------------------------------------------------------
-bool IPVideoGrabber::isFrameNew()
-{
-    return isNewFrameLoaded;
-}
 
-//------------------------------------------------------------------------------
 bool IPVideoGrabber::isFrameNew() const
 {
     return isNewFrameLoaded;
 }
 
-//------------------------------------------------------------------------------
-unsigned char* IPVideoGrabber::getPixels()
+
+bool IPVideoGrabber::isInitialized() const
+{
+	return true;
+}
+
+
+bool IPVideoGrabber::setPixelFormat(ofPixelFormat pixelFormat)
+{
+	return false;
+}
+
+
+ofPixelFormat IPVideoGrabber::getPixelFormat() const
+{
+	return img->getPixels().getPixelFormat();
+}
+
+
+ofPixels& IPVideoGrabber::getPixels()
 {
     return img->getPixels();
 }
 
-//------------------------------------------------------------------------------
-ofPixelsRef IPVideoGrabber::getPixelsRef()
+
+const ofPixels& IPVideoGrabber::getPixels() const
 {
-    return img->getPixelsRef();
+    return img->getPixels();
 }
 
-//------------------------------------------------------------------------------
-const ofPixelsRef IPVideoGrabber::getPixelsRef() const
-{
-    return img->getPixelsRef();
-}
 
-//------------------------------------------------------------------------------
 std::shared_ptr<ofImage> IPVideoGrabber::getFrame()
 {
     return img;
 }
 
-//------------------------------------------------------------------------------
-ofTexture & IPVideoGrabber::getTextureReference()
+
+ofTexture& IPVideoGrabber::getTexture()
 {
-    return img->getTextureReference();
+	return img->getTexture();
 }
 
-//------------------------------------------------------------------------------
+
+const ofTexture& IPVideoGrabber::getTexture() const
+{
+    return img->getTexture();
+}
+
+
 void IPVideoGrabber::setUseTexture(bool bUseTex)
 {
     img->setUseTexture(bUseTex);
 }
 
-//------------------------------------------------------------------------------
-float IPVideoGrabber::getWidth()
+
+bool IPVideoGrabber::isUsingTexture() const
+{
+	return true;
+}
+
+
+std::vector<ofTexture>& IPVideoGrabber::getTexturePlanes()
+{
+	tex.clear();
+	tex.push_back(img->getTexture());
+	return tex;
+}
+
+
+const vector<ofTexture>& IPVideoGrabber::getTexturePlanes() const
+{
+	tex.clear();
+	tex.push_back(img->getTexture());
+	return tex;
+}
+
+
+float IPVideoGrabber::getWidth() const
 {
     return img->getWidth();
 }
 
-//------------------------------------------------------------------------------
-float IPVideoGrabber::getHeight()
+
+float IPVideoGrabber::getHeight() const
 {
     return img->getHeight();
 }
 
-//------------------------------------------------------------------------------
+
 unsigned long IPVideoGrabber::getNumFramesReceived()
 {
     if(isConnected())
@@ -793,7 +812,7 @@ unsigned long IPVideoGrabber::getNumFramesReceived()
     }
 }
 
-//------------------------------------------------------------------------------
+
 unsigned long IPVideoGrabber::getNumBytesReceived()
 {
     if(isConnected())
@@ -807,48 +826,49 @@ unsigned long IPVideoGrabber::getNumBytesReceived()
     }
 }
 
-//------------------------------------------------------------------------------
-void IPVideoGrabber::draw(float x, float y)
+
+void IPVideoGrabber::draw(float x, float y) const
 {
     img->draw(x,y);
 }
 
-//------------------------------------------------------------------------------
-void IPVideoGrabber::draw(float x, float y, float width, float height)
+
+void IPVideoGrabber::draw(float x, float y, float width, float height) const
 {
     img->draw(x,y,width,height);
 }
 
-//------------------------------------------------------------------------------
-void IPVideoGrabber::draw(const ofPoint& point)
+
+void IPVideoGrabber::draw(const ofPoint& point) const
 {
     draw( point.x, point.y);
 }
 
-//------------------------------------------------------------------------------
-void IPVideoGrabber::draw(const ofRectangle & rect)
+
+void IPVideoGrabber::draw(const ofRectangle & rect) const
 {
     draw(rect.x, rect.y, rect.width, rect.height); 
 }
 
-//------------------------------------------------------------------------------
+
 void IPVideoGrabber::setAnchorPercent(float xPct, float yPct)
 {
     img->setAnchorPercent(xPct,yPct);
 }
 
-//------------------------------------------------------------------------------
-void IPVideoGrabber::setAnchorPoint(float x, float y) {
+
+void IPVideoGrabber::setAnchorPoint(float x, float y)
+{
     img->setAnchorPoint(x,y);
 }
 
-//------------------------------------------------------------------------------
+
 void IPVideoGrabber::resetAnchor()
 {
     img->resetAnchor();
 }
 
-//------------------------------------------------------------------------------
+
 float IPVideoGrabber::getFrameRate()
 {
     if(isConnected())
@@ -861,7 +881,7 @@ float IPVideoGrabber::getFrameRate()
     }
 }
     
-//------------------------------------------------------------------------------
+
 float IPVideoGrabber::getBitRate()
 {
     if(isConnected())
@@ -874,14 +894,14 @@ float IPVideoGrabber::getBitRate()
     }
 }
 
-//------------------------------------------------------------------------------
+
 void IPVideoGrabber::setCameraName(const std::string& _cameraName)
 {
     ofScopedLock lock(mutex);
     cameraName_a = _cameraName;
 }
 
-//------------------------------------------------------------------------------
+
 std::string IPVideoGrabber::getCameraName()
 {
     ofScopedLock lock(mutex);
@@ -895,7 +915,7 @@ std::string IPVideoGrabber::getCameraName()
     }
 }
 
-//------------------------------------------------------------------------------
+
 void IPVideoGrabber::setCookie(const std::string& key, const std::string& value) {
     cookies.add(key, value);
     if(isConnected())
@@ -904,7 +924,7 @@ void IPVideoGrabber::setCookie(const std::string& key, const std::string& value)
     }
 }
 
-//------------------------------------------------------------------------------
+
 void IPVideoGrabber::eraseCookie(const std::string& key)
 {
     cookies.erase(key);
@@ -914,14 +934,14 @@ void IPVideoGrabber::eraseCookie(const std::string& key)
     }
 }
 
-//------------------------------------------------------------------------------
+
 std::string IPVideoGrabber::getCookie(const std::string& key)
 {
     ofScopedLock lock(mutex);
     return cookies.get(key);
 }
 
-//------------------------------------------------------------------------------
+
 void IPVideoGrabber::setUsername(const std::string& _username)
 {
     ofScopedLock lock(mutex);
@@ -943,62 +963,62 @@ void IPVideoGrabber::setPassword(const std::string& _password)
     }
 }
 
-//------------------------------------------------------------------------------
+
 std::string IPVideoGrabber::getUsername()
 {
     ofScopedLock lock(mutex);
     return username_a;
 }
 
-//------------------------------------------------------------------------------
+
 std::string IPVideoGrabber::getPassword()
 {
     ofScopedLock lock(mutex);
     return password_a;
 }
 
-//------------------------------------------------------------------------------
+
 std::string IPVideoGrabber::getURI()
 {
     ofScopedLock lock(mutex);
     return uri_a.toString();
 }
 
-//------------------------------------------------------------------------------
+
 std::string IPVideoGrabber::getHost()
 {
     return uri_a.getHost();
 }
 
-//------------------------------------------------------------------------------
+
 std::string IPVideoGrabber::getQuery()
 {
     ofScopedLock lock(mutex);
     return uri_a.getQuery();
 }
 
-//------------------------------------------------------------------------------
+
 int IPVideoGrabber::getPort()
 {
     ofScopedLock lock(mutex);
     return uri_a.getPort();
 }
 
-//------------------------------------------------------------------------------
+
 std::string IPVideoGrabber::getFragment()
 {
     ofScopedLock lock(mutex);
     return uri_a.getFragment();
 }
 
-//------------------------------------------------------------------------------
+
 Poco::URI IPVideoGrabber::getPocoURI()
 {
     ofScopedLock lock(mutex);
     return uri_a;
 }
 
-//------------------------------------------------------------------------------
+
 void IPVideoGrabber::setURI(const std::string& _uri)
 {
     mutex.lock();
@@ -1009,7 +1029,7 @@ void IPVideoGrabber::setURI(const std::string& _uri)
     }
 }
 
-//------------------------------------------------------------------------------
+
 void IPVideoGrabber::setURI(const Poco::URI& _uri)
 {
     mutex.lock();
@@ -1022,7 +1042,7 @@ void IPVideoGrabber::setURI(const Poco::URI& _uri)
     }
 }
 
-//------------------------------------------------------------------------------
+
 void IPVideoGrabber::setUseProxy(bool useProxy)
 {
     ofScopedLock lock(mutex);
@@ -1033,7 +1053,7 @@ void IPVideoGrabber::setUseProxy(bool useProxy)
     }
 }
 
-//------------------------------------------------------------------------------
+
 void IPVideoGrabber::setProxyUsername(const std::string& username)
 {
     ofScopedLock lock(mutex);
@@ -1044,7 +1064,7 @@ void IPVideoGrabber::setProxyUsername(const std::string& username)
     }
 }
 
-//------------------------------------------------------------------------------
+
 void IPVideoGrabber::setProxyPassword(const std::string& password)
 {
     ofScopedLock lock(mutex);
@@ -1055,7 +1075,7 @@ void IPVideoGrabber::setProxyPassword(const std::string& password)
     }
 }
 
-//------------------------------------------------------------------------------
+
 void IPVideoGrabber::setProxyHost(const std::string& host) {
     ofScopedLock lock(mutex);
     proxyHost_a = host;
@@ -1065,7 +1085,7 @@ void IPVideoGrabber::setProxyHost(const std::string& host) {
     }
 }
 
-//------------------------------------------------------------------------------
+
 void IPVideoGrabber::setProxyPort(Poco::UInt16 port)
 {
     ofScopedLock lock(mutex);
@@ -1076,42 +1096,42 @@ void IPVideoGrabber::setProxyPort(Poco::UInt16 port)
     }
 }
 
-//------------------------------------------------------------------------------
+
 bool IPVideoGrabber::getUseProxy()
 {
     ofScopedLock lock(mutex);
     return bUseProxy_a;
 }
 
-//------------------------------------------------------------------------------
+
 std::string IPVideoGrabber::getProxyUsername()
 {
     ofScopedLock lock(mutex);
     return proxyUsername_a;
 }
 
-//------------------------------------------------------------------------------
+
 std::string IPVideoGrabber::getProxyPassword()
 {
     ofScopedLock lock(mutex);
     return proxyPassword_a;
 }
 
-//------------------------------------------------------------------------------
+
 std::string IPVideoGrabber::getProxyHost()
 {
     ofScopedLock lock(mutex);
     return proxyHost_a;
 }
 
-//------------------------------------------------------------------------------
+
 Poco::UInt16 IPVideoGrabber::getProxyPort()
 {
     ofScopedLock lock(mutex);
     return proxyPort_a;
 }
 
-//------------------------------------------------------------------------------
+
 void IPVideoGrabber::imageResized(int width, int height)
 {
     ofResizeEventArgs resizeEvent;
@@ -1120,7 +1140,7 @@ void IPVideoGrabber::imageResized(int width, int height)
     ofNotifyEvent(videoResized, resizeEvent, this);
 }
 
-//------------------------------------------------------------------------------
+
 void IPVideoGrabber::setReconnectTimeout(unsigned long ms)
 {
     reconnectTimeout = ms;

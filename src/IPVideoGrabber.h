@@ -70,35 +70,42 @@ public:
     void waitForDisconnect();
 
     // ofBaseVideo
-	bool isFrameNew();
 	bool isFrameNew() const;
 	void close();
-    
+	bool isInitialized() const;
+	bool setPixelFormat(ofPixelFormat pixelFormat);
+	ofPixelFormat getPixelFormat() const;
+
     void reset();
 
     // ofBaseHasPixels
-	unsigned char* getPixels();
-    ofPixelsRef getPixelsRef();
-    const ofPixelsRef getPixelsRef() const;
-    
+	ofPixels& getPixels();
+	const ofPixels& getPixels() const;
+
     std::shared_ptr<ofImage> getFrame();
     
     // ofBaseHasTexture
-    ofTexture& getTextureReference();
+	ofTexture& getTexture();
+	const ofTexture& getTexture() const;
 	void setUseTexture(bool bUseTex);
+	bool isUsingTexture() const;
+
+	// ofBaseHasTexturePlanes
+	std::vector<ofTexture>& getTexturePlanes();
+	const std::vector<ofTexture>& getTexturePlanes() const;
 
     // ofBaseDraws
-    void draw(float x, float y);
-	void draw(float x, float y, float w, float h);
-	void draw(const ofPoint& point);
-	void draw(const ofRectangle& rect);
+    void draw(float x, float y) const;
+	void draw(float x, float y, float w, float h) const;
+	void draw(const ofPoint& point) const;
+	void draw(const ofRectangle& rect) const;
     
     void setAnchorPercent(float xPct, float yPct);
     void setAnchorPoint(float x, float y);
 	void resetAnchor();
     
-    float getWidth();
-    float getHeight();
+    float getWidth() const;
+    float getHeight() const;
     
     unsigned long getNumFramesReceived(); // not const b/c we access a mutex
     unsigned long getNumBytesReceived();  // not const b/c we access a mutex
@@ -170,13 +177,8 @@ public:
         
     ofEvent<ofResizeEventArgs> 	videoResized;
 
-    static SharedPtr makeShared()
-    {
-        return SharedPtr(new IPVideoGrabber());
-    }
-
 protected:    
-    void threadedFunction(); // connect to server
+    void threadedFunction() override;// connect to server
     void imageResized(int width, int height);
     
 private:
@@ -197,9 +199,10 @@ private:
     //ofPixels pix;
     
     int ci; // current image index
-    ofImage image_a[2]; // image double buffer.  this flips
+    ofPixels image_a[2]; // image double buffer.  this flips
     std::shared_ptr<ofImage> img;
-    
+	mutable std::vector<ofTexture> tex;
+
     bool isNewFrameLoaded;       // is there a new frame ready to be uploaded to glspace
     bool isBackBufferReady_a;
     
