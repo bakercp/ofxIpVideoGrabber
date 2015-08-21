@@ -614,13 +614,13 @@ void IPVideoGrabber::threadedFunction()
                                 mutex.lock();     // LOCKING //
                                 ///////////////////////////////
 
-								std::string fn = ofGetTimestampString() + ".jpg";
+								std::string fn = "/tmp/" + ofGetTimestampString() + ".jpg";
 
 								ofBufferToFile(fn, buffer);
 
 								ofPixels pix;
 
-								cout << "here" << endl;
+								cout << "fn: " << fn << endl;
 
 								bool result = ofLoadImage(pix, fn);
 
@@ -636,6 +636,8 @@ void IPVideoGrabber::threadedFunction()
                                     ofLogError("IPVideoGrabber") << "ofImage could not load the curent buffer, continuing.";
                                 }
                                 
+                                ofFile::removeFile(fn);
+
                                 ///////////////////////////////
                                 mutex.unlock(); // UNLOCKING //
                                 ///////////////////////////////
