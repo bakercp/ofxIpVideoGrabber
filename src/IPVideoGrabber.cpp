@@ -641,14 +641,21 @@ void IPVideoGrabber::threadedFunction()
                                 ///////////////////////////////
 
                                 // get the back image (ci^1)
-                                if(image_a[ci^1].loadImage(buffer))
+                                try
                                 {
-                                    isBackBufferReady_a = true;
-                                    nFrames_a++; // incrase frame cout
+                                    if(image_a[ci^1].loadImage(buffer))
+                                    {
+                                        isBackBufferReady_a = true;
+                                        nFrames_a++; // incrase frame cout
+                                    }
+                                    else
+                                    {
+                                        ofLogError("IPVideoGrabber") << "ofImage could not load the curent buffer, continuing.";
+                                    }
                                 }
-                                else
+                                catch (const char * e)
                                 {
-                                    ofLogError("IPVideoGrabber") << "ofImage could not load the curent buffer, continuing.";
+                                    ofLogError("IPVideoGrabber") << "FreeImage could not decode the current buffer as JPEG, meybe it's broken.";
                                 }
                                 
                                 ///////////////////////////////
