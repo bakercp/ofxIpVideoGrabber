@@ -1,8 +1,4 @@
 <streams>
-	<stream url="http://67.208.104.218/anony/mjpg.cgi"/>
-	<stream url="http://98.189.188.232/anony/mjpg.cgi"/>
-	<stream url="http://148.61.142.228/axis-cgi/mjpg/video.cgi?resolution=320x240"/>
-	<stream url="http://82.79.176.85:8081/axis-cgi/mjpg/video.cgi?resolution=320x240"/>
-	<stream url="http://24.155.150.53/anony/mjpg.cgi"/>
 	<stream url="http://216.8.159.21/axis-cgi/mjpg/video.cgi?resolution=320x240"/>
+	<stream url="http://24.155.150.53/anony/mjpg.cgi"/>
 </streams>
