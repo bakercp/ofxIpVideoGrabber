@@ -49,9 +49,11 @@ static char EOI = 0xD9;
 IPVideoGrabber::IPVideoGrabber():
     defaultBoundaryMarker_a("--myboundary"),
     cameraName_a(""),
+    username_a(""),
+    password_a(""),
+    bUseProxy_a(false),
     proxyUsername_a(""),
     proxyPassword_a(""),
-    bUseProxy_a(false),
     proxyHost_a("127.0.0.1"),
     proxyPort_a(Poco::Net::HTTPSession::HTTP_PORT),
 	ci(0),
@@ -76,7 +78,6 @@ IPVideoGrabber::IPVideoGrabber():
     maxReconnects(20),
     sessionTimeout(2000)
 {
-
     img->allocate(1,1, OF_IMAGE_COLOR); // allocate something so it won't throw errors
     img->setColor(0,0,ofColor(0));
 
