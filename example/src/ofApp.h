@@ -1,6 +1,6 @@
 // =============================================================================
 //
-// Copyright (c) 2009-2013 Christopher Baker <http://christopherbaker.net>
+// Copyright (c) 2009-2015 Christopher Baker <http://christopherbaker.net>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -31,15 +31,15 @@
 #include "IPVideoGrabber.h"
 
 
-#if defined(TARGET_OF_IPHONE) || defined(TARGET_ANDROID) || defined(TARGET_LINUX_ARM)
+//#if defined(TARGET_OF_IPHONE) || defined(TARGET_ANDROID) || defined(TARGET_LINUX_ARM)
     #define NUM_CAMERAS 1
     #define NUM_ROWS 1
     #define NUM_COLS 1
-#else
-    #define NUM_CAMERAS 9
-    #define NUM_ROWS 3
-    #define NUM_COLS 3
-#endif
+//#else
+//    #define NUM_CAMERAS 9
+//    #define NUM_ROWS 3
+//    #define NUM_COLS 3
+//#endif
 
 
 class IPCameraDef
@@ -85,8 +85,7 @@ private:
 };
 
 
-using ofx::Video::IPVideoGrabber;
-using ofx::Video::SharedIPVideoGrabber;
+using namespace ofx;
 
 
 class ofApp: public ofBaseApp
@@ -98,7 +97,7 @@ public:
     
     void keyPressed(int key);
 
-    std::vector<SharedIPVideoGrabber> grabbers;
+	std::vector<std::shared_ptr<Video::IPVideoGrabber>> grabbers;
 
     void loadCameras();
     IPCameraDef& getNextCamera();

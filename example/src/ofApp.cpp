@@ -1,6 +1,6 @@
 // =============================================================================
 //
-// Copyright (c) 2009-2013 Christopher Baker <http://christopherbaker.net>
+// Copyright (c) 2009-2015 Christopher Baker <http://christopherbaker.net>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,6 @@
 #include "ofApp.h"
 
 
-//------------------------------------------------------------------------------
 void ofApp::setup()
 {
     ofSetLogLevel(OF_LOG_VERBOSE);
@@ -34,11 +33,11 @@ void ofApp::setup()
     loadCameras();
     
     // initialize connection
-    for(std::size_t i = 0; i < NUM_CAMERAS; i++)
+    for (std::size_t i = 0; i < NUM_CAMERAS; i++)
     {
         IPCameraDef& cam = getNextCamera();
-        
-        SharedIPVideoGrabber c = IPVideoGrabber::makeShared();
+
+		std::shared_ptr<Video::IPVideoGrabber> c = std::make_shared<Video::IPVideoGrabber>();
 
         // if your camera uses standard web-based authentication, use this
         // c->setUsername(cam.username);
@@ -60,14 +59,14 @@ void ofApp::setup()
     }
 }
 
-//------------------------------------------------------------------------------
+
 IPCameraDef& ofApp::getNextCamera()
 {
     nextCamera = (nextCamera + 1) % ipcams.size();
     return ipcams[nextCamera];
 }
 
-//------------------------------------------------------------------------------
+
 void ofApp::loadCameras()
 {
     
@@ -82,15 +81,14 @@ void ofApp::loadCameras()
 
 	ofxXmlSettings XML;
     
-	if(XML.loadFile("streams.xml"))
+	if (XML.loadFile("streams.xml"))
     {
-
         XML.pushTag("streams");
         std::string tag = "stream";
 		
 		int nCams = XML.getNumTags(tag);
 		
-		for(std::size_t n = 0; n < nCams; n++)
+		for (std::size_t n = 0; n < nCams; ++n)
         {
             
             IPCameraDef def(XML.getAttribute(tag, "name", "", n),
@@ -123,11 +121,11 @@ void ofApp::loadCameras()
     nextCamera = ipcams.size();
 }
 
-//------------------------------------------------------------------------------
+
 void ofApp::videoResized(const void* sender, ofResizeEventArgs& arg)
 {
     // find the camera that sent the resize event changed
-    for(std::size_t i = 0; i < NUM_CAMERAS; i++)
+    for(std::size_t i = 0; i < NUM_CAMERAS; ++i)
     {
         if(sender == &grabbers[i])
         {
@@ -141,18 +139,18 @@ void ofApp::videoResized(const void* sender, ofResizeEventArgs& arg)
 }
 
 
-//------------------------------------------------------------------------------
 void ofApp::update()
 {
     // update the cameras
-    for(std::size_t i = 0; i < grabbers.size(); i++)
+    for (std::size_t i = 0; i < grabbers.size(); ++i)
     {
         grabbers[i]->update();
     }
 }
 
-//------------------------------------------------------------------------------
-void ofApp::draw(){
+
+void ofApp::draw()
+{
 	ofBackground(0,0,0);
 
 	ofSetHexColor(0xffffff);
@@ -192,7 +190,7 @@ void ofApp::draw(){
         
         // draw the info box
         ofSetColor(0,80);
-        ofRect(5,5,w-10,h-10);
+        ofDrawRectangle(5,5,w-10,h-10);
         
         float kbps = grabbers[i]->getBitRate() / 1000.0f; // kilobits / second, not kibibits / second
         totalKbps+=kbps;
@@ -230,7 +228,7 @@ void ofApp::draw(){
 
     ofEnableAlphaBlending();
     ofSetColor(0,80);
-    ofRect(5,5, 150, 40);
+    ofDrawRectangle(5,5, 150, 40);
     
     ofSetColor(255);
     // ofToString formatting available in 0072+
@@ -241,16 +239,16 @@ void ofApp::draw(){
 
 }
 
-//------------------------------------------------------------------------------
+
 void ofApp::keyPressed(int key)
 {
     if(key == ' ')
     {
         // initialize connection
-        for(std::size_t i = 0; i < NUM_CAMERAS; i++)
+        for (std::size_t i = 0; i < NUM_CAMERAS; ++i)
         {
             ofRemoveListener(grabbers[i]->videoResized, this, &ofApp::videoResized);
-            SharedIPVideoGrabber c = IPVideoGrabber::makeShared();
+			std::shared_ptr<Video::IPVideoGrabber> c = std::make_shared<Video::IPVideoGrabber>();
             IPCameraDef& cam = getNextCamera();
             c->setUsername(cam.getUsername());
             c->setPassword(cam.getPassword());
