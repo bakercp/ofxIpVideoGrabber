@@ -61,119 +61,119 @@ public:
 
     void exit(ofEventArgs& a);
 
-    void update();
+    void update() override;
     
     void update(ofEventArgs& a);
 
-    void connect();
+    void connect() ;
     void disconnect();
     void waitForDisconnect();
 
     // ofBaseVideo
-	bool isFrameNew() const;
-	void close();
-	bool isInitialized() const;
-	bool setPixelFormat(ofPixelFormat pixelFormat);
-	ofPixelFormat getPixelFormat() const;
+	bool isFrameNew() const override;
+	void close() override;
+	bool isInitialized() const override;
+	bool setPixelFormat(ofPixelFormat pixelFormat) override;
+	ofPixelFormat getPixelFormat() const override;
 
     void reset();
 
     // ofBaseHasPixels
-	ofPixels& getPixels();
-	const ofPixels& getPixels() const;
+	ofPixels& getPixels() override;
+	const ofPixels& getPixels() const override;
 
     std::shared_ptr<ofImage> getFrame();
     
     // ofBaseHasTexture
-	ofTexture& getTexture();
-	const ofTexture& getTexture() const;
-	void setUseTexture(bool bUseTex);
-	bool isUsingTexture() const;
+	ofTexture& getTexture() override;
+	const ofTexture& getTexture() const override;
+	void setUseTexture(bool bUseTex) override;
+	bool isUsingTexture() const override;
 
 	// ofBaseHasTexturePlanes
-	std::vector<ofTexture>& getTexturePlanes();
-	const std::vector<ofTexture>& getTexturePlanes() const;
+	std::vector<ofTexture>& getTexturePlanes() override;
+	const std::vector<ofTexture>& getTexturePlanes() const override;
 
     // ofBaseDraws
-    void draw(float x, float y) const;
-	void draw(float x, float y, float w, float h) const;
-	void draw(const ofPoint& point) const;
-	void draw(const ofRectangle& rect) const;
+    void draw(float x, float y) const override;
+	void draw(float x, float y, float w, float h) const override;
+	void draw(const ofPoint& point) const override;
+	void draw(const ofRectangle& rect) const override;
     
-    void setAnchorPercent(float xPct, float yPct);
-    void setAnchorPoint(float x, float y);
-	void resetAnchor();
+    void setAnchorPercent(float xPct, float yPct) override;
+    void setAnchorPoint(float x, float y) override;
+	void resetAnchor() override;
     
-    float getWidth() const;
-    float getHeight() const;
+    float getWidth() const override;
+    float getHeight() const override;
     
-    unsigned long getNumFramesReceived(); // not const b/c we access a mutex
-    unsigned long getNumBytesReceived();  // not const b/c we access a mutex
+    uint64_t getNumFramesReceived() const;
+    uint64_t getNumBytesReceived() const;
 
-    float getFrameRate();
-    float getBitRate();
+    float getFrameRate() const;
+    float getBitRate() const;
     
-    std::string getCameraName();
+    std::string getCameraName() const;
     void setCameraName(const std::string& cameraName);
     
     // set video URI
     void setURI(const std::string& uri);
     void setURI(const Poco::URI& uri);
 
-    std::string getURI();
-    Poco::URI getPocoURI();
+    std::string getURI() const;
+    Poco::URI getPocoURI() const;
     
     // poco uri access
-    std::string getHost();
-    std::string getQuery();
-    int getPort();
-    std::string getFragment();
+    std::string getHost() const;
+    std::string getQuery() const;
+    uint16_t getPort() const;
+    std::string getFragment() const;
     
     // cookies
     void setCookie(const std::string& key, const std::string& value);
     void eraseCookie(const std::string& key);
-    std::string getCookie(const std::string& key);
+    std::string getCookie(const std::string& key) const;
 
     // basic authentication
     void setUsername(const std::string& username);
     void setPassword(const std::string& password);
     
-    std::string getUsername();// const;
-    std::string getPassword();// const;
+    std::string getUsername() const;
+    std::string getPassword() const;
     
     // proxy server
     void setUseProxy(bool useProxy);
     void setProxyUsername(const std::string& username);
     void setProxyPassword(const std::string& password);
     void setProxyHost(const std::string& host);
-    void setProxyPort(Poco::UInt16 port);
+    void setProxyPort(uint16_t port);
 
-    bool getUseProxy(); // const;
-    std::string getProxyUsername();// const;
-    std::string getProxyPassword();// const;
-    std::string getProxyHost();// const;
-    Poco::UInt16 getProxyPort();// const;
+    bool getUseProxy() const;
+    std::string getProxyUsername() const;
+    std::string getProxyPassword() const;
+    std::string getProxyHost() const;
+    Poco::UInt16 getProxyPort() const;
     
-    Poco::Net::HTTPClientSession& getSessionRef();
+    Poco::Net::HTTPClientSession& getSession();
     
-    bool isConnected();
+    bool isConnected() const;
     
     bool hasConnectionFailed() const;
     
-    void setReconnectTimeout(unsigned long ms);
-    unsigned long getReconnectTimeout() const; // ms
-    bool getNeedsReconnect();
+    void setReconnectTimeout(uint64_t ms);
+    uint64_t getReconnectTimeout() const;
+    bool getNeedsReconnect() const;
     bool getAutoReconnect() const;
-    unsigned long getReconnectCount();
-    unsigned long getMaxReconnects() const;
-    void setMaxReconnects(unsigned long num);
-    unsigned long getAutoRetryDelay(); // const ofThread ...
-    void setAutoRetryDelay(unsigned long delay_ms);
-    unsigned long getNextAutoRetryTime(); // const ofThread...;
-    unsigned long getTimeTillNextAutoRetry(); // const ofThread...;
+    uint64_t getReconnectCount() const;
+    uint64_t getMaxReconnects() const;
+    void setMaxReconnects(uint64_t num);
+    uint64_t getAutoRetryDelay() const;
+    void setAutoRetryDelay(uint64_t delay_ms);
+    uint64_t getNextAutoRetryTime() const;
+    uint64_t getTimeTillNextAutoRetry() const;
 
     void setDefaultBoundaryMarker(const std::string& boundarMarker);
-    std::string getDefaultBoundaryMarker(); // const;
+    std::string getDefaultBoundaryMarker() const;
         
     ofEvent<ofResizeEventArgs> 	videoResized;
 
@@ -194,7 +194,7 @@ private:
     std::string proxyUsername_a;
     std::string proxyPassword_a;
     std::string proxyHost_a;
-    Poco::UInt16 proxyPort_a;
+    uint16_t proxyPort_a;
     
     //ofPixels pix;
     
@@ -206,30 +206,30 @@ private:
     bool isNewFrameLoaded;       // is there a new frame ready to be uploaded to glspace
     bool isBackBufferReady_a;
     
-    unsigned long connectTime_a; // init time
-    unsigned long elapsedTime_a;
+    uint64_t connectTime_a; // init time
+    uint64_t elapsedTime_a;
     
-    unsigned long nBytes_a;
-    unsigned long nFrames_a;
+    uint64_t nBytes_a;
+    uint64_t nFrames_a;
     
     float currentBitRate;
     float currentFrameRate;
     
     float minBitrate; // the minimum acceptable bitrate before reconnecting
-    unsigned long lastValidBitrateTime; // the time of the last valid bitrate (will wait for reconnectTime time)
-    unsigned long reconnectTimeout; // ms the amount ot time we will wait to reach the min bitrate
+    uint64_t lastValidBitrateTime; // the time of the last valid bitrate (will wait for reconnectTime time)
+    uint64_t reconnectTimeout; // ms the amount ot time we will wait to reach the min bitrate
     
     
-    unsigned long autoRetryDelay_a; // retry delay in ms
-    unsigned long nextAutoRetry_a;
+    uint64_t autoRetryDelay_a; // retry delay in ms
+    uint64_t nextAutoRetry_a;
     bool connectionFailure; // max reconnects exceeded, is dead.
     bool needsReconnect_a; // needs reconnecting
     bool autoReconnect;  // should automatically reconnect
-    unsigned long reconnectCount_a; // the number of reconnects attempted
-    unsigned long maxReconnects;  // the maximum number of reconnect attempts that will be made
+    uint64_t reconnectCount_a; // the number of reconnects attempted
+    uint64_t maxReconnects;  // the maximum number of reconnect attempts that will be made
 
     
-    unsigned long sessionTimeout; // ms
+    uint64_t sessionTimeout; // ms
     Poco::URI uri_a;
     
     Poco::Net::NameValueCollection cookies;
