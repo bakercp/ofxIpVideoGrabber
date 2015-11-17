@@ -28,9 +28,11 @@ The addon should sit in `openFrameworks/addons/ofxIpVideoGrabber/`.
 
 #### Which version to use?
 
-ofxIpVideoGrabber has been tested with the latest development version of Open Frameworks including 0.8.0.
+ofxIpVideoGrabber has been tested with the latest development version of openFrameworks including 0.9.0+.
 
 The master branch should be is stable.  New features, etc are in the `develop` branch.
+
+For past releases see https://github.com/bakercp/ofxIpVideoGrabber/releases
 
 #Dependencies
 
@@ -102,5 +104,3 @@ MIT License.
 
 For information on usage and redistribution, and for a DISCLAIMER OF ALL
 WARRANTIES, see the file, "LICENSE.txt," in this distribution.
-
-
