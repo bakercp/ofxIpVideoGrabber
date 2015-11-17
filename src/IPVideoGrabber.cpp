@@ -47,34 +47,34 @@ static char EOI = 0xD9;
 
 
 IPVideoGrabber::IPVideoGrabber():
+    defaultBoundaryMarker_a("--myboundary"),
+    cameraName_a(""),
+    proxyUsername_a(""),
+    proxyPassword_a(""),
+    bUseProxy_a(false),
+    proxyHost_a("127.0.0.1"),
+    proxyPort_a(Poco::Net::HTTPSession::HTTP_PORT),
 	ci(0),
 	img(std::make_shared<ofImage>()),
-	isNewFrameLoaded(false),
-	isBackBufferReady_a(false),
-	cameraName_a(""),
-	sessionTimeout(2000), // ms
-	reconnectTimeout(5000),
-	lastValidBitrateTime(0),
-	currentBitRate(0.0),
-	currentFrameRate(0.0),
-	connectTime_a(0),
-	elapsedTime_a(0),
-	nBytes_a(0),
-	nFrames_a(0),
-	minBitrate(8),
-	connectionFailure(false),
-	needsReconnect_a(false),
-	autoReconnect(true),
-	reconnectCount_a(0),
-	maxReconnects(20),
-	autoRetryDelay_a(1000), // at least 1 second retry delay
-	nextAutoRetry_a(0),
-	bUseProxy_a(false),
-	proxyUsername_a(""),
-	proxyPassword_a(""),
-	proxyHost_a("127.0.0.1"),
-	proxyPort_a(Poco::Net::HTTPSession::HTTP_PORT),
-	defaultBoundaryMarker_a("--myboundary")
+    isNewFrameLoaded(false),
+    isBackBufferReady_a(false),
+    connectTime_a(0),
+    elapsedTime_a(0),
+    nBytes_a(0),
+    nFrames_a(0),
+    currentBitRate(0.0),
+    currentFrameRate(0.0),
+    minBitrate(8),
+    lastValidBitrateTime(0),
+    reconnectTimeout(5000),
+    autoRetryDelay_a(1000), // at least 1 second retry delay
+    nextAutoRetry_a(0),
+    connectionFailure(false),
+    needsReconnect_a(false),
+    autoReconnect(true),
+    reconnectCount_a(0),
+    maxReconnects(20),
+    sessionTimeout(2000)
 {
 
     img->allocate(1,1, OF_IMAGE_COLOR); // allocate something so it won't throw errors
