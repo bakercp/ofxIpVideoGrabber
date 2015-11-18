@@ -36,14 +36,14 @@ enum ContentStreamMode
     MODE_JPEG = 1
 };
 
-static int MIN_JPEG_SIZE = 134; // minimum number of bytes for a valid jpeg
+const static int MIN_JPEG_SIZE = 134; // minimum number of bytes for a valid jpeg
 
 // jpeg starting and ending bytes
-static int BUF_LEN = 4*512000; // 8 * 65536 = 512 kB
+const static int BUF_LEN = 4*512000; // 8 * 65536 = 512 kB
 
-static char JFF = 0xFF;
-static char SOI = 0xD8;
-static char EOI = 0xD9;
+const static char JFF = 0xFF;
+const static char SOI = 0xD8;
+const static char EOI = 0xD9;
 
 
 IPVideoGrabber::IPVideoGrabber():
