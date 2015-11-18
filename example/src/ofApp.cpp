@@ -37,7 +37,7 @@ void ofApp::setup()
     {
         IPCameraDef& cam = getNextCamera();
 
-		std::shared_ptr<Video::IPVideoGrabber> c = std::make_shared<Video::IPVideoGrabber>();
+	std::shared_ptr<Video::IPVideoGrabber> c = std::make_shared<Video::IPVideoGrabber>();
 
         // if your camera uses standard web-based authentication, use this
         // c->setUsername(cam.username);
@@ -77,20 +77,19 @@ void ofApp::loadCameras()
     // to define a camera with a username / password
     //ipcams.push_back(IPCameraDef("http://148.61.142.228/axis-cgi/mjpg/video.cgi", "username", "password"));
 
-	ofLog(OF_LOG_NOTICE, "---------------Loading Streams---------------");
+    ofLog(OF_LOG_NOTICE, "---------------Loading Streams---------------");
 
-	ofxXmlSettings XML;
+    ofxXmlSettings XML;
     
-	if (XML.loadFile("streams.xml"))
+    if (XML.loadFile("streams.xml"))
     {
         XML.pushTag("streams");
         std::string tag = "stream";
 		
-		int nCams = XML.getNumTags(tag);
+	std::size_t nCams = static_cast<std::size_t>(XML.getNumTags(tag));
 		
-		for (std::size_t n = 0; n < nCams; ++n)
+	for (std::size_t n = 0; n < nCams; ++n)
         {
-            
             IPCameraDef def(XML.getAttribute(tag, "name", "", n),
                             XML.getAttribute(tag, "url", "", n),
                             XML.getAttribute(tag, "username", "", n),
@@ -106,17 +105,17 @@ void ofApp::loadCameras()
             
             ipcams.push_back(def);
             
-		}
-		
-		XML.popTag();
-
 	}
+		
+	XML.popTag();
+
+    }
     else
     {
 		ofLog(OF_LOG_ERROR, "Unable to load streams.xml.");
-	}
+    }
     
-	ofLog(OF_LOG_NOTICE, "-----------Loading Streams Complete----------");
+    ofLog(OF_LOG_NOTICE, "-----------Loading Streams Complete----------");
     
     nextCamera = ipcams.size();
 }
@@ -125,9 +124,9 @@ void ofApp::loadCameras()
 void ofApp::videoResized(const void* sender, ofResizeEventArgs& arg)
 {
     // find the camera that sent the resize event changed
-    for(std::size_t i = 0; i < NUM_CAMERAS; ++i)
+    for (std::size_t i = 0; i < NUM_CAMERAS; ++i)
     {
-        if(sender == &grabbers[i])
+        if (sender == &grabbers[i])
         {
             std::stringstream ss;
             ss << "videoResized: ";
@@ -151,9 +150,9 @@ void ofApp::update()
 
 void ofApp::draw()
 {
-	ofBackground(0,0,0);
+    ofBackground(0,0,0);
 
-	ofSetHexColor(0xffffff);
+    ofSetHexColor(0xffffff);
     
     int row = 0;
     int col = 0;
@@ -167,7 +166,7 @@ void ofApp::draw()
     float totalKbps = 0;
     float totalFPS = 0;
     
-    for(std::size_t i = 0; i < grabbers.size(); i++)
+    for (std::size_t i = 0; i < grabbers.size(); ++i)
     {
         x = col * w;
         y = row * h;
@@ -175,7 +174,7 @@ void ofApp::draw()
         // draw in a grid
         row = (row + 1) % NUM_ROWS;
 
-        if(row == 0)
+        if (row == 0)
         {
             col = (col + 1) % NUM_COLS;
         }
@@ -242,7 +241,7 @@ void ofApp::draw()
 
 void ofApp::keyPressed(int key)
 {
-    if(key == ' ')
+    if (key == ' ')
     {
         // initialize connection
         for (std::size_t i = 0; i < NUM_CAMERAS; ++i)

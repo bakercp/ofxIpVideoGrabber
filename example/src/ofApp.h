@@ -97,7 +97,7 @@ public:
     
     void keyPressed(int key);
 
-	std::vector<std::shared_ptr<Video::IPVideoGrabber>> grabbers;
+    std::vector<std::shared_ptr<Video::IPVideoGrabber>> grabbers;
 
     void loadCameras();
     IPCameraDef& getNextCamera();

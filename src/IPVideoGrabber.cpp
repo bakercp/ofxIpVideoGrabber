@@ -56,8 +56,8 @@ IPVideoGrabber::IPVideoGrabber():
     proxyPassword_a(""),
     proxyHost_a("127.0.0.1"),
     proxyPort_a(Poco::Net::HTTPSession::HTTP_PORT),
-	ci(0),
-	img(std::make_shared<ofImage>()),
+    ci(0),
+    img(std::make_shared<ofImage>()),
     isNewFrameLoaded(false),
     isBackBufferReady_a(false),
     connectTime_a(0),
@@ -148,7 +148,8 @@ void IPVideoGrabber::update()
 
         elapsedTime_a = (connectTime_a == 0) ? 0 : (now - connectTime_a);
 
-        if(isBackBufferReady_a) {
+        if (isBackBufferReady_a) 
+        {
             ci^=1; // swap buffers (ci^1) was just filled in the thread
             
             int newW = image_a[ci].getWidth();    // new buffer
@@ -166,7 +167,7 @@ void IPVideoGrabber::update()
             // synchronized methods.
             mutex.unlock();
             
-            if(newW != oldW || newH != oldH) imageResized(newW, newH);
+            if (newW != oldW || newH != oldH) imageResized(newW, newH);
             
             // lock it again.
             mutex.lock();
@@ -182,7 +183,7 @@ void IPVideoGrabber::update()
             isBackBufferReady_a = false;
         }
         
-        if(elapsedTime_a > 0)
+        if (elapsedTime_a > 0)
         {
             currentFrameRate = ( float(nFrames_a) )       / (elapsedTime_a / (1000.0f)); // frames per second
             currentBitRate   = ( float(nBytes_a ) / 8.0f) / (elapsedTime_a / (1000.0f)); // bits per second
@@ -193,7 +194,7 @@ void IPVideoGrabber::update()
             currentBitRate   = 0;
         }
         
-        if(currentBitRate > minBitrate)
+        if (currentBitRate > minBitrate)
         {
             lastValidBitrateTime = elapsedTime_a;
         }
@@ -217,12 +218,12 @@ void IPVideoGrabber::update()
     else
     {
         
-        if(getNeedsReconnect())
+        if (getNeedsReconnect())
         {
-            if(getReconnectCount() < maxReconnects)
+            if (getReconnectCount() < maxReconnects)
             {
                 unsigned long nar = getNextAutoRetryTime();
-                if(now > getNextAutoRetryTime())
+                if (now > getNextAutoRetryTime())
                 {
                     ofLogVerbose("IPVideoGrabber") << "[" << cName << "] attempting reconnection " << getReconnectCount() << "/" << maxReconnects;
                     connect();
@@ -234,7 +235,7 @@ void IPVideoGrabber::update()
             }
             else
             {
-                if(!connectionFailure)
+                if (!connectionFailure)
                 {
                     ofLogError("IPVideoGrabber") << "["<< cName << "] Connection retries exceeded, connection connection failed.  Call ::reset() to try again.";
                     connectionFailure = true;
@@ -248,7 +249,7 @@ void IPVideoGrabber::update()
 
 void IPVideoGrabber::connect()
 {
-    if(!isConnected())
+    if (!isConnected())
     {
         // start the thread.
         
@@ -268,7 +269,7 @@ void IPVideoGrabber::connect()
 
 void IPVideoGrabber::waitForDisconnect()
 {
-    if(isConnected())
+    if (isConnected())
     {
         waitForThread(true); // close it all down (politely) -- true sets running flag
     }
@@ -409,8 +410,7 @@ std::string IPVideoGrabber::getDefaultBoundaryMarker() const
 
 void IPVideoGrabber::threadedFunction()
 {
-	Poco::Buffer<char> cBuf(BUF_LEN);
-//    char cBuf[BUF_LEN];
+    Poco::Buffer<char> cBuf(BUF_LEN);
 
     ofBuffer buffer;
 
@@ -526,7 +526,7 @@ void IPVideoGrabber::threadedFunction()
         
         ContentStreamMode mode = MODE_HEADER;
         
-        int c = 0;
+        std::size_t c = 0;
         
         bool resetBuffer = false;
         
