@@ -41,9 +41,9 @@ const std::size_t IPVideoGrabber::MIN_JPEG_SIZE = 134; // minimum number of byte
 // jpeg starting and ending bytes
 const std::size_t IPVideoGrabber::BUF_LEN = 4*512000; // 8 * 65536 = 512 kB
 
-const uint8_t IPVideoGrabber::JFF = 0xFF;
-const uint8_t IPVideoGrabber::SOI = 0xD8;
-const uint8_t IPVideoGrabber::EOI = 0xD9;
+const char IPVideoGrabber::JFF = 0xFF;
+const char IPVideoGrabber::SOI = 0xD8;
+const char IPVideoGrabber::EOI = 0xD9;
 
 
 IPVideoGrabber::IPVideoGrabber():

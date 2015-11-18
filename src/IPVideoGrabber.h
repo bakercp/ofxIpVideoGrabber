@@ -236,9 +236,9 @@ private:
 
 	const static std::size_t MIN_JPEG_SIZE;
 	const static std::size_t BUF_LEN;
-	const static uint8_t JFF;
-	const static uint8_t SOI;
-	const static uint8_t EOI;
+	const static char JFF;
+	const static char SOI;
+	const static char EOI;
 };
 
 
