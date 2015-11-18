@@ -36,14 +36,14 @@ enum ContentStreamMode
     MODE_JPEG = 1
 };
 
-const static int MIN_JPEG_SIZE = 134; // minimum number of bytes for a valid jpeg
+const std::size_t IPVideoGrabber::MIN_JPEG_SIZE = 134; // minimum number of bytes for a valid jpeg
 
 // jpeg starting and ending bytes
-const static int BUF_LEN = 4*512000; // 8 * 65536 = 512 kB
+const std::size_t IPVideoGrabber::BUF_LEN = 4*512000; // 8 * 65536 = 512 kB
 
-const static char JFF = 0xFF;
-const static char SOI = 0xD8;
-const static char EOI = 0xD9;
+const uint8_t IPVideoGrabber::JFF = 0xFF;
+const uint8_t IPVideoGrabber::SOI = 0xD8;
+const uint8_t IPVideoGrabber::EOI = 0xD9;
 
 
 IPVideoGrabber::IPVideoGrabber():
@@ -409,7 +409,8 @@ std::string IPVideoGrabber::getDefaultBoundaryMarker() const
 
 void IPVideoGrabber::threadedFunction()
 {
-    char cBuf[BUF_LEN];
+	Poco::Buffer<char> cBuf(BUF_LEN);
+//    char cBuf[BUF_LEN];
 
     ofBuffer buffer;
 
@@ -551,8 +552,8 @@ void IPVideoGrabber::threadedFunction()
                     {
                         if (c > 1)
                         {
-                            cBuf[c-1] = 0; // NULL terminator
-                            std::string line(cBuf); // make a string object
+                            cBuf[c-1] = '\0'; // NULL terminator
+                            std::string line(cBuf.begin()); // make a string object
                             
                             std::vector<std::string> keyValue = ofSplitString(line,":", true); // split it (try)
                             if (keyValue.size() > 1)
@@ -604,7 +605,7 @@ void IPVideoGrabber::threadedFunction()
                         }
                         else if (cBuf[c] == EOI)
                         {
-                            buffer = ofBuffer(cBuf, c+1);
+                            buffer = ofBuffer(cBuf.begin(), c+1);
 
                             if (c >= MIN_JPEG_SIZE)
                             { // some cameras send 2+ EOIs in a row, with no valid bytes in between

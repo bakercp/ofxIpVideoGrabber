@@ -102,7 +102,7 @@ public:
     void loadCameras();
     IPCameraDef& getNextCamera();
     std::vector<IPCameraDef> ipcams; // a list of IPCameras
-    int nextCamera;
+    std::size_t nextCamera;
 
     // This message occurs when the incoming video stream image size changes. 
     // This can happen if the IPCamera has a single broadcast state (some cheaper IPCams do this)
