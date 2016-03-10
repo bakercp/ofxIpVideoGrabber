@@ -78,8 +78,8 @@ IPVideoGrabber::IPVideoGrabber():
     maxReconnects(20),
     sessionTimeout(2000)
 {
-    img->allocate(1,1, OF_IMAGE_COLOR); // allocate something so it won't throw errors
-    img->setColor(0,0,ofColor(0));
+    img->allocate(1, 1, OF_IMAGE_COLOR); // allocate something so it won't throw errors
+    img->setColor(0, 0, ofColor(0));
 
     // THIS IS EXTREMELY IMPORTANT.
     // To shut down the thread cleanly, we cannot allow openFrameworks to de-init FreeImage
@@ -124,21 +124,13 @@ void IPVideoGrabber::update(ofEventArgs& a)
 
 void IPVideoGrabber::update()
 {
-        
-    if(!isMainThread())
-    {
-        // we enforce this because textures are uploaded here.
-        ofLogError("IPVideoGrabber") << "update() may not be called from outside the main thread.  Returning.";
-        return;
-    }
-
     isNewFrameLoaded = false;
 
-    unsigned long now = ofGetSystemTime();
+    uint64_t now = ofGetSystemTime();
     
     std::string cName = getCameraName(); // consequence of scoped locking
     
-    if(isConnected())
+    if (isConnected())
     {
         ///////////////////////////////
         mutex.lock();     // LOCKING //
@@ -200,7 +192,7 @@ void IPVideoGrabber::update()
         }
         else
         {
-            if((elapsedTime_a - lastValidBitrateTime) > reconnectTimeout)
+            if ((elapsedTime_a - lastValidBitrateTime) > reconnectTimeout)
             {
                 ofLogVerbose("IPVideoGrabber") << "["<< cName << "] Disconnecting because of slow bitrate." << isConnected();
                 needsReconnect_a = true;
@@ -258,7 +250,7 @@ void IPVideoGrabber::connect()
         currentBitRate   = 0.0;
         currentFrameRate = 0.0;
 
-        startThread(true);   // blocking, verbose
+        startThread();
     }
     else
     {
@@ -301,7 +293,7 @@ void IPVideoGrabber::reset()
     reconnectCount_a = 0;
     connectionFailure = false;
     mutex.unlock();
-    waitForDisconnect();
+    //waitForDisconnect();
 }
 
 
