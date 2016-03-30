@@ -1,6 +1,6 @@
 // =============================================================================
 //
-// Copyright (c) 2009-2013 Christopher Baker <http://christopherbaker.net>
+// Copyright (c) 2009-2016 Christopher Baker <http://christopherbaker.net>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -30,14 +30,13 @@
 #include "Poco/Net/HTTPClientSession.h"
 #include "Poco/Net/NameValueCollection.h"
 #include "ofBaseTypes.h"
-#include "ofThread.h"
 
 
 namespace ofx {
 namespace Video {
 
 
-class IPVideoGrabber: public ofBaseVideoDraws, protected ofThread
+class IPVideoGrabber: public ofBaseVideoDraws
 {
 public:
     IPVideoGrabber();
@@ -162,11 +161,16 @@ public:
     ofEvent<ofResizeEventArgs> 	videoResized;
 
 protected:    
-    void threadedFunction() override;// connect to server
+    void threadedFunction();// override;// connect to server
     void imageResized(int width, int height);
     
 private:
+    std::thread _thread;
+
+
     ofEventListener _exitListener;
+
+    std::atomic<bool> _isConnected;
 
     std::string defaultBoundaryMarker_a;
     
@@ -205,7 +209,6 @@ private:
     uint64_t lastValidBitrateTime; // the time of the last valid bitrate (will wait for reconnectTime time)
     uint64_t reconnectTimeout; // ms the amount ot time we will wait to reach the min bitrate
     
-    
     uint64_t autoRetryDelay_a; // retry delay in ms
     uint64_t nextAutoRetry_a;
     bool connectionFailure; // max reconnects exceeded, is dead.
@@ -218,6 +221,8 @@ private:
     Poco::URI uri_a;
     
     Poco::Net::NameValueCollection cookies;
+
+    mutable std::mutex mutex;
 
 	const static std::size_t MIN_JPEG_SIZE;
 	const static std::size_t BUF_LEN;

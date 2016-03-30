@@ -1,6 +1,6 @@
 // =============================================================================
 //
-// Copyright (c) 2009-2015 Christopher Baker <http://christopherbaker.net>
+// Copyright (c) 2009-2016 Christopher Baker <http://christopherbaker.net>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -52,6 +52,7 @@ const char IPVideoGrabber::EOI = 0xD9;
 
 
 IPVideoGrabber::IPVideoGrabber():
+    _isConnected(false),
     defaultBoundaryMarker_a("--myboundary"),
     cameraName_a(""),
     username_a(""),
@@ -130,7 +131,7 @@ void IPVideoGrabber::update()
     
     std::string cName = getCameraName(); // consequence of scoped locking
     
-    if (isConnected())
+    if (_isConnected)
     {
         ///////////////////////////////
         mutex.lock();     // LOCKING //
@@ -194,7 +195,7 @@ void IPVideoGrabber::update()
         {
             if ((elapsedTime_a - lastValidBitrateTime) > reconnectTimeout)
             {
-                ofLogVerbose("IPVideoGrabber") << "["<< cName << "] Disconnecting because of slow bitrate." << isConnected();
+                ofLogVerbose("IPVideoGrabber") << "["<< cName << "] Disconnecting because of slow bitrate.";
                 needsReconnect_a = true;
             }
             else
@@ -242,8 +243,10 @@ void IPVideoGrabber::update()
 
 void IPVideoGrabber::connect()
 {
-    if (!isConnected())
+    if (!_isConnected)
     {
+        ofLogWarning("IPVideoGrabber::connect")  << "[" << getCameraName() << "]: Connecting!";
+
         // start the thread.
         
         lastValidBitrateTime = 0;
@@ -251,7 +254,9 @@ void IPVideoGrabber::connect()
         currentBitRate   = 0.0;
         currentFrameRate = 0.0;
 
-        startThread();
+        _isConnected = true;
+        _thread = std::thread(&IPVideoGrabber::threadedFunction, this);
+
     }
     else
     {
@@ -262,19 +267,26 @@ void IPVideoGrabber::connect()
 
 void IPVideoGrabber::waitForDisconnect()
 {
-    if (isConnected())
+    ofLogWarning("IPVideoGrabber::waitForDisconnect")  << "Waiting for disconnect ... ";
+
+    disconnect();
+
+    try
     {
-        ofLogWarning("IPVideoGrabber::waitForDisconnect")  << "Waiting for disconnect ... ";
-        waitForThread(true); // close it all down (politely) -- true sets running flag
+        _thread.join();
+    }
+    catch (const std::exception& exc)
+    {
+        ofLogWarning("IPVideoGrabber::error")  << "Joining failed: " << exc.what();
     }
 }
 
 
 void IPVideoGrabber::disconnect()
 {
-    if (isConnected())
+    if (_isConnected)
     {
-        stopThread();
+        _isConnected = false;
     }
     else
     {
@@ -301,7 +313,7 @@ void IPVideoGrabber::reset()
 
 bool IPVideoGrabber::isConnected() const
 {
-    return isThreadRunning();
+    return _isConnected;
 }
 
 
@@ -531,7 +543,7 @@ void IPVideoGrabber::threadedFunction()
         // int contentLength = 0;
         std::string boundaryType;
         
-        while (isThreadRunning())
+        while (_isConnected)
         {
             if (!responseInputStream.fail() && !responseInputStream.bad())
             {
@@ -680,13 +692,21 @@ void IPVideoGrabber::threadedFunction()
         } // end while
 
     }
-    catch (Poco::Exception& e)
+    catch (const Poco::Exception& e)
     {
         mutex.lock();
         needsReconnect_a = true;
         nextAutoRetry_a = ofGetSystemTime() + autoRetryDelay_a;
         mutex.unlock();
         ofLogError("IPVideoGrabber") << "Exception : [" << getCameraName() << "]: " <<  e.displayText();
+    }
+    catch (...)
+    {
+        mutex.lock();
+        needsReconnect_a = true;
+        nextAutoRetry_a = ofGetSystemTime() + autoRetryDelay_a;
+        mutex.unlock();
+        ofLogError("IPVideoGrabber") << "Unknown exception.";
     }
 
 
@@ -793,7 +813,7 @@ float IPVideoGrabber::getHeight() const
 
 uint64_t IPVideoGrabber::getNumFramesReceived() const
 {
-    if (isConnected())
+    if (_isConnected)
     {
         std::unique_lock<std::mutex> lock(mutex);
         return nFrames_a;
@@ -807,7 +827,7 @@ uint64_t IPVideoGrabber::getNumFramesReceived() const
 
 uint64_t IPVideoGrabber::getNumBytesReceived() const
 {
-    if (isConnected())
+    if (_isConnected)
     {
         std::unique_lock<std::mutex> lock(mutex);
         return nBytes_a;
@@ -863,7 +883,7 @@ void IPVideoGrabber::resetAnchor()
 
 float IPVideoGrabber::getFrameRate() const
 {
-    if (isConnected())
+    if (_isConnected)
     {
         return currentFrameRate;
     }
@@ -876,7 +896,7 @@ float IPVideoGrabber::getFrameRate() const
 
 float IPVideoGrabber::getBitRate() const
 {
-    if (isConnected())
+    if (_isConnected)
     {
         return currentBitRate;
     }
@@ -912,7 +932,7 @@ void IPVideoGrabber::setCookie(const std::string& key, const std::string& value)
 {
     cookies.add(key, value);
 
-    if (isConnected())
+    if (_isConnected)
     {
         ofLogWarning("IPVideoGrabber") << "Session currently active.  New cookie info will be applied on the next connection.";
     }
@@ -923,7 +943,7 @@ void IPVideoGrabber::eraseCookie(const std::string& key)
 {
     cookies.erase(key);
 
-    if (isConnected())
+    if (_isConnected)
     {
         ofLogWarning("IPVideoGrabber") << "Session currently active.  New cookie info will be applied on the next connection.";
     }
@@ -939,9 +959,11 @@ std::string IPVideoGrabber::getCookie(const std::string& key) const
 
 void IPVideoGrabber::setUsername(const std::string& _username)
 {
-    std::unique_lock<std::mutex> lock(mutex);
+    mutex.lock();
     username_a = _username;
-    if (isConnected())
+    mutex.unlock();
+
+    if (_isConnected)
     {
         ofLogWarning("IPVideoGrabber") << "Session currently active.  New authentication info will be applied on the next connection.";
     }
@@ -950,9 +972,11 @@ void IPVideoGrabber::setUsername(const std::string& _username)
 
 void IPVideoGrabber::setPassword(const std::string& _password)
 {
-    std::unique_lock<std::mutex> lock(mutex);
+    mutex.lock();
     password_a = _password;
-    if (isConnected())
+    mutex.unlock();
+
+    if (_isConnected)
     {
         ofLogWarning("IPVideoGrabber") << "Session currently active.  New authentication info will be applied on the next connection.";
     }
@@ -1019,7 +1043,9 @@ void IPVideoGrabber::setURI(const std::string& _uri)
     mutex.lock();
     uri_a = Poco::URI(_uri);
     mutex.unlock();
-    if(isThreadRunning()) {
+
+    if (_isConnected)
+    {
         ofLogWarning("IPVideoGrabber") << "Session currently active.  New URI will be applied on the next connection.";
     }
 }
@@ -1031,7 +1057,7 @@ void IPVideoGrabber::setURI(const Poco::URI& _uri)
     uri_a = _uri;
     mutex.unlock();
 
-    if(isThreadRunning())
+    if (_isConnected)
     {
         ofLogWarning("IPVideoGrabber") << "Session currently active.  New URI will be applied on the next connection.";
     }
@@ -1040,9 +1066,11 @@ void IPVideoGrabber::setURI(const Poco::URI& _uri)
 
 void IPVideoGrabber::setUseProxy(bool useProxy)
 {
-    std::unique_lock<std::mutex> lock(mutex);
+    mutex.lock();
     bUseProxy_a = useProxy;
-    if(isThreadRunning())
+    mutex.unlock();
+
+    if (_isConnected)
     {
         ofLogWarning("IPVideoGrabber") << "Session currently active.  New proxy info will be applied on the next connection.";
     }
@@ -1051,9 +1079,11 @@ void IPVideoGrabber::setUseProxy(bool useProxy)
 
 void IPVideoGrabber::setProxyUsername(const std::string& username)
 {
-    std::unique_lock<std::mutex> lock(mutex);
+    mutex.lock();
     proxyUsername_a = username;
-    if (isThreadRunning())
+    mutex.unlock();
+
+    if (_isConnected)
     {
         ofLogWarning("IPVideoGrabber") << "Session currently active.  New proxy info will be applied on the next connection.";
     }
@@ -1062,9 +1092,11 @@ void IPVideoGrabber::setProxyUsername(const std::string& username)
 
 void IPVideoGrabber::setProxyPassword(const std::string& password)
 {
-    std::unique_lock<std::mutex> lock(mutex);
+    mutex.lock();
     proxyPassword_a = password;
-    if (isThreadRunning())
+    mutex.unlock();
+
+    if (_isConnected)
     {
         ofLogWarning("IPVideoGrabber") << "Session currently active.  New proxy info will be applied on the next connection.";
     }
@@ -1072,10 +1104,12 @@ void IPVideoGrabber::setProxyPassword(const std::string& password)
 
 
 void IPVideoGrabber::setProxyHost(const std::string& host)
-    {
-    std::unique_lock<std::mutex> lock(mutex);
+{
+    mutex.lock();
     proxyHost_a = host;
-    if (isThreadRunning())
+    mutex.unlock();
+
+    if (_isConnected)
     {
         ofLogWarning("IPVideoGrabber") << "Session currently active.  New proxy info will be applied on the next connection.";
     }
@@ -1084,9 +1118,11 @@ void IPVideoGrabber::setProxyHost(const std::string& host)
 
 void IPVideoGrabber::setProxyPort(uint16_t port)
 {
-    std::unique_lock<std::mutex> lock(mutex);
+    mutex.lock();
     proxyPort_a = port;
-    if (isThreadRunning())
+    mutex.unlock();
+
+    if (_isConnected)
     {
         ofLogWarning("IPVideoGrabber") << "Session currently active.  New proxy info will be applied on the next connection.";
     }
