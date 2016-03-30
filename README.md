@@ -98,7 +98,7 @@ If you are interested in using these cameras with Processing or Max/MSP/Jitter, 
 You might also check out [IPCAM2SYPHON](https://github.com/bakercp/IPCAM2SYPHON).  It wraps this library and sends cam textures via [Syphon](http://syphon.v002.info/).
 
 #License
-Copyright (c) 2011, 2012 Christopher Baker <http://christopherbaker.net>
+Copyright (c) 2011-2016 Christopher Baker <http://christopherbaker.net>
 
 MIT License.
 
