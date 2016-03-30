@@ -26,25 +26,11 @@
 #pragma once
 
 
-#include <iostream>
-#include "ofMain.h"
-#include "Poco/Exception.h"
-#include "Poco/Path.h"
-#include "Poco/StreamTokenizer.h"
-#include "Poco/StreamCopier.h"
-#include "Poco/UTF8String.h"
-#include "Poco/ScopedLock.h"
-#include "Poco/Token.h"
 #include "Poco/URI.h"
-#include "Poco/Net/HTTPBasicCredentials.h"
 #include "Poco/Net/HTTPClientSession.h"
-#include "Poco/Net/HTTPCookie.h"
-#include "Poco/Net/HTTPRequest.h"
-#include "Poco/Net/HTTPResponse.h"
-#include "Poco/Net/HTTPStreamFactory.h"
-#include "Poco/Net/MessageHeader.h"
 #include "Poco/Net/NameValueCollection.h"
-#include "Poco/Net/NetException.h"
+#include "ofBaseTypes.h"
+#include "ofThread.h"
 
 
 namespace ofx {
@@ -54,8 +40,6 @@ namespace Video {
 class IPVideoGrabber: public ofBaseVideoDraws, protected ofThread
 {
 public:
-    typedef std::shared_ptr<IPVideoGrabber> SharedPtr;
-    
     IPVideoGrabber();
     virtual ~IPVideoGrabber();
 
@@ -182,6 +166,8 @@ protected:
     void imageResized(int width, int height);
     
 private:
+    ofEventListener _exitListener;
+
     std::string defaultBoundaryMarker_a;
     
     std::string cameraName_a;
@@ -239,9 +225,6 @@ private:
 	const static char SOI;
 	const static char EOI;
 };
-
-
-typedef IPVideoGrabber::SharedPtr SharedIPVideoGrabber;
 
 
 } } // namespace ofx::Video

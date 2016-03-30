@@ -24,6 +24,11 @@
 
 
 #include "IPVideoGrabber.h"
+#include "Poco/UTF8String.h"
+#include "Poco/Net/HTTPBasicCredentials.h"
+#include "Poco/Net/HTTPRequest.h"
+#include "Poco/Net/HTTPResponse.h"
+#include "ofImage.h"
 
 
 namespace ofx {
@@ -82,37 +87,32 @@ IPVideoGrabber::IPVideoGrabber():
     img->setColor(0, 0, ofColor(0));
 
     // THIS IS EXTREMELY IMPORTANT.
-    // To shut down the thread cleanly, we cannot allow openFrameworks to de-init FreeImage
-    // before this thread has completed any current image loads.  Thus we need to make sure
-    // that this->waitForDisconnect() is called before the main oF loop calls
-    // ofImage::ofCloseFreeImage().  This can often result in slight lags during shutdown,
-    // especially when multiple threads are running, but it prevents crashes.
-    // To do that, we simply need to register an ofEvents.exit listener.
-    // Alternatively, each thread could instantiate its own instance of FreeImage, but that
-    // seems memory inefficient.  Thus, the shutdown lag for now.
+    // To shut down the thread cleanly, we cannot allow openFrameworks to
+    // de-init FreeImage before this thread has completed any current image
+    // loads. Thus we need to make sure that this->waitForDisconnect() is called
+    // before the main oF loop calls ofImage::ofCloseFreeImage(). This can often
+    // result in slight lags during shutdown, especially when multiple threads
+    // are running, but it prevents crashes. To do that, we simply need to
+    // register an ofEvents.exit listener. Alternatively, each thread could
+    // instantiate its own instance of FreeImage, but that seems memory
+    // inefficient. Thus, the shutdown lag for now.
 
-    ofAddListener(ofEvents().exit, this, &IPVideoGrabber::exit);
+    _exitListener = ofEvents().exit.newListener(this, &IPVideoGrabber::exit);
 }
 
 
 IPVideoGrabber::~IPVideoGrabber()
 {
     // N.B. In most cases, IPVideoGrabber::exit() will be called before
-    // the program ever makes it into this destructor, but in some cases we
-    waitForDisconnect(); //
-    
-    // it is ok to unregister an item that is not currently registered
-    // POCO's internal loop won't complain or return errors
-    // POCO stores the delegates in a std::vector and iterates through
-    // deleting and returning on match, and doing nothing on a no-match condition
-    ofRemoveListener(ofEvents().exit,this,&IPVideoGrabber::exit);
+    // the program ever makes it into this destructor.
+    waitForDisconnect();
+    ofLogVerbose("IPVideoGrabber::~IPVideoGrabber") << "Destroyed.";
 }
 
 
 void IPVideoGrabber::exit(ofEventArgs & a) {
-    ofLogVerbose("IPVideoGrabber") << "exit() called on [" << getCameraName() << "] -- cleaning up and exiting.";
+    ofLogVerbose("IPVideoGrabber::exit") << "exit() called on [" << getCameraName() << "] -- cleaning up and exiting.";
     waitForDisconnect();
-    ofRemoveListener(ofEvents().exit,this,&IPVideoGrabber::exit);
 }
 
 
@@ -215,6 +215,7 @@ void IPVideoGrabber::update()
             if (maxReconnects < 0 || getReconnectCount() < maxReconnects)
             {
                 uint64_t nar = getNextAutoRetryTime();
+
                 if (now > getNextAutoRetryTime())
                 {
                     ofLogVerbose("IPVideoGrabber") << "[" << cName << "] attempting reconnection " << getReconnectCount() << "/" << maxReconnects;
@@ -254,7 +255,7 @@ void IPVideoGrabber::connect()
     }
     else
     {
-        ofLogWarning("IPVideoGrabber")  << "[" << getCameraName() << "]: Already connected.  Disconnect first.";
+        ofLogWarning("IPVideoGrabber::connect")  << "[" << getCameraName() << "]: Already connected.  Disconnect first.";
     }
 }
 
@@ -263,6 +264,7 @@ void IPVideoGrabber::waitForDisconnect()
 {
     if (isConnected())
     {
+        ofLogWarning("IPVideoGrabber::waitForDisconnect")  << "Waiting for disconnect ... ";
         waitForThread(true); // close it all down (politely) -- true sets running flag
     }
 }
@@ -276,7 +278,7 @@ void IPVideoGrabber::disconnect()
     }
     else
     {
-        ofLogWarning("IPVideoGrabber")  << "[" << getCameraName() << "]: Not connected.  Connect first.";
+        ofLogWarning("IPVideoGrabber::disconnect")  << "[" << getCameraName() << "]: Not connected.  Connect first.";
     }
 }
 
@@ -371,6 +373,7 @@ uint64_t IPVideoGrabber::getNextAutoRetryTime() const
 uint64_t IPVideoGrabber::getTimeTillNextAutoRetry() const
 {
     std::unique_lock<std::mutex> lock(mutex);
+
     if (nextAutoRetry_a == 0)
     {
         return 0;
@@ -385,7 +388,9 @@ uint64_t IPVideoGrabber::getTimeTillNextAutoRetry() const
 void IPVideoGrabber::setDefaultBoundaryMarker(const std::string& _defaultBoundaryMarker)
 {
     std::unique_lock<std::mutex> lock(mutex);
+
     defaultBoundaryMarker_a = _defaultBoundaryMarker;
+
     if (isConnected())
     {
         ofLogWarning("IPVideoGrabber") << "Session currently active.  New boundary info will be applied on the next connection.";
@@ -554,7 +559,7 @@ void IPVideoGrabber::threadedFunction()
                                 std::string& key   = keyValue[0]; // reference to trimmed key for better readability
                                 std::string& value = keyValue[1]; // reference to trimmed val for better readability
                                 
-                                if (Poco::UTF8::icompare(std::string("content-length"),key) == 0)
+                                if (Poco::UTF8::icompare(std::string("content-length"), key) == 0)
                                 {
                                     // contentLength = ofToInt(value);
                                     // TODO: we don't currently use content length, but could
