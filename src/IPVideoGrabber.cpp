@@ -277,7 +277,7 @@ void IPVideoGrabber::waitForDisconnect()
     }
     catch (const std::exception& exc)
     {
-        ofLogWarning("IPVideoGrabber::error")  << "Joining failed: " << exc.what();
+        ofLogVerbose("IPVideoGrabber::waitForDisconnect")  << "Joining failed: " << exc.what();
     }
 }
 
