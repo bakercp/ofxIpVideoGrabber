@@ -403,7 +403,7 @@ void IPVideoGrabber::setDefaultBoundaryMarker(const std::string& _defaultBoundar
 
     defaultBoundaryMarker_a = _defaultBoundaryMarker;
 
-    if (isConnected())
+    if (_isConnected)
     {
         ofLogWarning("IPVideoGrabber") << "Session currently active.  New boundary info will be applied on the next connection.";
     }
@@ -470,7 +470,7 @@ void IPVideoGrabber::threadedFunction()
     
     // add trailing slash if nothing is there
     std::string path(uri_a.getPathAndQuery());
-    if(path.empty()) path = "/";
+    if (path.empty()) path = "/";
 
     // create our header request
     // TODO: add SSL via ofxSSL
@@ -486,7 +486,7 @@ void IPVideoGrabber::threadedFunction()
     }
     
     // send cookies if needed (sometimes, we send our authentication as cookies)
-    if(!cookies.empty()) request.setCookies(cookies);
+    if (!cookies.empty()) request.setCookies(cookies);
 
     ///////////////////////////////
 	mutex.unlock(); // UNLOCKING //
@@ -771,9 +771,9 @@ const ofTexture& IPVideoGrabber::getTexture() const
 }
 
 
-void IPVideoGrabber::setUseTexture(bool bUseTex)
+void IPVideoGrabber::setUseTexture(bool useTexture)
 {
-    img->setUseTexture(bUseTex);
+    ofLogWarning("IPVideoGrabber::setUseTexture") << "This is always true.";
 }
 
 
@@ -785,17 +785,17 @@ bool IPVideoGrabber::isUsingTexture() const
 
 std::vector<ofTexture>& IPVideoGrabber::getTexturePlanes()
 {
-	tex.clear();
-	tex.push_back(img->getTexture());
-	return tex;
+	texPlanes.clear();
+	texPlanes.push_back(getTexture());
+	return texPlanes;
 }
 
 
 const vector<ofTexture>& IPVideoGrabber::getTexturePlanes() const
 {
-	tex.clear();
-	tex.push_back(img->getTexture());
-	return tex;
+	texPlanes.clear();
+	texPlanes.push_back(getTexture());
+	return texPlanes;
 }
 
 
@@ -841,19 +841,19 @@ uint64_t IPVideoGrabber::getNumBytesReceived() const
 
 void IPVideoGrabber::draw(float x, float y) const
 {
-    img->draw(x,y);
+    img->draw(x, y);
 }
 
 
 void IPVideoGrabber::draw(float x, float y, float width, float height) const
 {
-    img->draw(x,y,width,height);
+    img->draw(x, y, width, height);
 }
 
 
 void IPVideoGrabber::draw(const ofPoint& point) const
 {
-    draw( point.x, point.y);
+    draw(point.x, point.y);
 }
 
 

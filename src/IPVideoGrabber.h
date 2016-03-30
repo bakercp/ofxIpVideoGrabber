@@ -191,7 +191,7 @@ private:
     int ci; // current image index
     ofPixels image_a[2]; // image double buffer.  this flips
     std::shared_ptr<ofImage> img;
-	mutable std::vector<ofTexture> tex;
+	mutable std::vector<ofTexture> texPlanes;
 
     bool isNewFrameLoaded;       // is there a new frame ready to be uploaded to glspace
     bool isBackBufferReady_a;
