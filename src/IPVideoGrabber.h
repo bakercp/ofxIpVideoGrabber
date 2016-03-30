@@ -164,9 +164,9 @@ public:
     uint64_t getReconnectTimeout() const;
     bool getNeedsReconnect() const;
     bool getAutoReconnect() const;
-    uint64_t getReconnectCount() const;
-    uint64_t getMaxReconnects() const;
-    void setMaxReconnects(uint64_t num);
+    int getReconnectCount() const;
+    int getMaxReconnects() const;
+    void setMaxReconnects(int num);
     uint64_t getAutoRetryDelay() const;
     void setAutoRetryDelay(uint64_t delay_ms);
     uint64_t getNextAutoRetryTime() const;
@@ -225,10 +225,9 @@ private:
     bool connectionFailure; // max reconnects exceeded, is dead.
     bool needsReconnect_a; // needs reconnecting
     bool autoReconnect;  // should automatically reconnect
-    uint64_t reconnectCount_a; // the number of reconnects attempted
-    uint64_t maxReconnects;  // the maximum number of reconnect attempts that will be made
+    int reconnectCount_a; // the number of reconnects attempted
+    int maxReconnects;  // the maximum number of reconnect attempts that will be made
 
-    
     uint64_t sessionTimeout; // ms
     Poco::URI uri_a;
     

@@ -91,7 +91,7 @@ IPVideoGrabber::IPVideoGrabber():
     // Alternatively, each thread could instantiate its own instance of FreeImage, but that
     // seems memory inefficient.  Thus, the shutdown lag for now.
 
-    ofAddListener(ofEvents().exit,this,&IPVideoGrabber::exit);
+    ofAddListener(ofEvents().exit, this, &IPVideoGrabber::exit);
 }
 
 
@@ -212,9 +212,9 @@ void IPVideoGrabber::update()
         
         if (getNeedsReconnect())
         {
-            if (getReconnectCount() < maxReconnects)
+            if (maxReconnects < 0 || getReconnectCount() < maxReconnects)
             {
-                unsigned long nar = getNextAutoRetryTime();
+                uint64_t nar = getNextAutoRetryTime();
                 if (now > getNextAutoRetryTime())
                 {
                     ofLogVerbose("IPVideoGrabber") << "[" << cName << "] attempting reconnection " << getReconnectCount() << "/" << maxReconnects;
@@ -328,20 +328,20 @@ bool IPVideoGrabber::getAutoReconnect() const
 }
 
 
-uint64_t IPVideoGrabber::getReconnectCount() const
+int IPVideoGrabber::getReconnectCount() const
 {
     std::unique_lock<std::mutex> lock(mutex);
     return reconnectCount_a;
 }
 
 
-uint64_t IPVideoGrabber::getMaxReconnects() const
+int IPVideoGrabber::getMaxReconnects() const
 {
     return maxReconnects;
 }
 
 
-void IPVideoGrabber::setMaxReconnects(uint64_t num)
+void IPVideoGrabber::setMaxReconnects(int num)
 {
     maxReconnects = num;
 }
