@@ -236,6 +236,7 @@ void ofApp::draw()
     ofDrawBitmapString("TOT Kb/S: " + ofToString(totalKbps,2/*,7,' '*/), 10, 41);
     ofDisableAlphaBlending();
 
+    ofDrawBitmapString("Press Spacebar for next Video", 10, ofGetHeight() - 14);
 }
 
 
