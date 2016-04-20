@@ -98,7 +98,10 @@ IPVideoGrabber::IPVideoGrabber():
     // instantiate its own instance of FreeImage, but that seems memory
     // inefficient. Thus, the shutdown lag for now.
 
+#if OF_VERSION_MAJOR < 1 && OF_VERSION_MINOR >= 10
     _exitListener = ofEvents().exit.newListener(this, &IPVideoGrabber::exit);
+#endif
+
 }
 
 

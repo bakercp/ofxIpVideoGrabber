@@ -167,8 +167,9 @@ protected:
 private:
     std::thread _thread;
 
-
+#if OF_VERSION_MAJOR < 1 && OF_VERSION_MINOR >= 10
     ofEventListener _exitListener;
+#endif
 
     std::atomic<bool> _isConnected;
 
