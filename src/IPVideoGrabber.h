@@ -26,6 +26,7 @@
 #pragma once
 
 
+#include <atomic>
 #include "Poco/URI.h"
 #include "Poco/Net/HTTPClientSession.h"
 #include "Poco/Net/NameValueCollection.h"
