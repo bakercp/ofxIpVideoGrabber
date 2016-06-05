@@ -1,6 +1,6 @@
 // =============================================================================
 //
-// Copyright (c) 2009-2015 Christopher Baker <http://christopherbaker.net>
+// Copyright (c) 2009-2016 Christopher Baker <http://christopherbaker.net>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -91,10 +91,10 @@ void ofApp::loadCameras()
         XML.pushTag("streams");
         std::string tag = "stream";
 		
-	std::size_t nCams = static_cast<std::size_t>(XML.getNumTags(tag));
+        std::size_t nCams = static_cast<std::size_t>(XML.getNumTags(tag));
 		
-	for (std::size_t n = 0; n < nCams; ++n)
-    {
+        for (std::size_t n = 0; n < nCams; ++n)
+        {
         std::string username = XML.getAttribute(tag, "username", "", n);
         std::string password = XML.getAttribute(tag, "password", "", n);
 
@@ -150,10 +150,10 @@ void ofApp::loadCameras()
 
 void ofApp::videoResized(const void* sender, ofResizeEventArgs& arg)
 {
-    // find the camera that sent the resize event changed
+    // Find the camera that sent the resize event changed.
     for (std::size_t i = 0; i < NUM_CAMERAS; ++i)
     {
-        if (sender == &grabbers[i])
+        if (sender == grabbers[i].get())
         {
             std::stringstream ss;
             ss << "videoResized: ";
@@ -227,17 +227,17 @@ void ofApp::draw()
         std::stringstream ss;
         
         // ofToString formatting available in 0072+
-        ss << "          NAME: " << grabbers[i]->getCameraName() << endl;
-        ss << "          HOST: " << grabbers[i]->getHost() << endl;
-        ss << "           FPS: " << ofToString(fps,  2/*,13,' '*/) << endl;
-        ss << "          Kb/S: " << ofToString(kbps, 2/*,13,' '*/) << endl;
-        ss << " #Bytes Recv'd: " << ofToString(grabbers[i]->getNumBytesReceived(),  0/*,10,' '*/) << endl;
-        ss << "#Frames Recv'd: " << ofToString(grabbers[i]->getNumFramesReceived(), 0/*,10,' '*/) << endl;
-        ss << "Auto Reconnect: " << (grabbers[i]->getAutoReconnect() ? "YES" : "NO") << endl;
-        ss << " Needs Connect: " << (grabbers[i]->getNeedsReconnect() ? "YES" : "NO") << endl;
-        ss << "Time Till Next: " << grabbers[i]->getTimeTillNextAutoRetry() << " ms" << endl;
-        ss << "Num Reconnects: " << ofToString(grabbers[i]->getReconnectCount()) << endl;
-        ss << "Max Reconnects: " << ofToString(grabbers[i]->getMaxReconnects()) << endl;
+        ss << "          NAME: " << grabbers[i]->getCameraName() << std::endl;
+        ss << "          HOST: " << grabbers[i]->getHost() << std::endl;
+        ss << "           FPS: " << ofToString(fps,  2/*,13,' '*/) << std::endl;
+        ss << "          Kb/S: " << ofToString(kbps, 2/*,13,' '*/) << std::endl;
+        ss << " #Bytes Recv'd: " << ofToString(grabbers[i]->getNumBytesReceived(),  0/*,10,' '*/) << std::endl;
+        ss << "#Frames Recv'd: " << ofToString(grabbers[i]->getNumFramesReceived(), 0/*,10,' '*/) << std::endl;
+        ss << "Auto Reconnect: " << (grabbers[i]->getAutoReconnect() ? "YES" : "NO") << std::endl;
+        ss << " Needs Connect: " << (grabbers[i]->getNeedsReconnect() ? "YES" : "NO") << std::endl;
+        ss << "Time Till Next: " << grabbers[i]->getTimeTillNextAutoRetry() << " ms" << std::endl;
+        ss << "Num Reconnects: " << ofToString(grabbers[i]->getReconnectCount()) << std::endl;
+        ss << "Max Reconnects: " << ofToString(grabbers[i]->getMaxReconnects()) << std::endl;
         ss << "  Connect Fail: " << (grabbers[i]->hasConnectionFailed() ? "YES" : "NO");
 
         ofSetColor(255);
@@ -258,11 +258,12 @@ void ofApp::draw()
     
     ofSetColor(255);
     // ofToString formatting available in 0072+
-    ofDrawBitmapString(" AVG FPS: " + ofToString(avgFPS,2/*,7,' '*/), 10,17);
-    ofDrawBitmapString("AVG Kb/S: " + ofToString(avgKbps,2/*,7,' '*/), 10,29);
-    ofDrawBitmapString("TOT Kb/S: " + ofToString(totalKbps,2/*,7,' '*/), 10,41);
+    ofDrawBitmapString(" AVG FPS: " + ofToString(avgFPS,2/*,7,' '*/), 10, 17);
+    ofDrawBitmapString("AVG Kb/S: " + ofToString(avgKbps,2/*,7,' '*/), 10, 29);
+    ofDrawBitmapString("TOT Kb/S: " + ofToString(totalKbps,2/*,7,' '*/), 10, 41);
     ofDisableAlphaBlending();
 
+    ofDrawBitmapString("Press Spacebar for next Video", 10, ofGetHeight() - 14);
 }
 
 
@@ -274,7 +275,7 @@ void ofApp::keyPressed(int key)
         for (std::size_t i = 0; i < NUM_CAMERAS; ++i)
         {
             ofRemoveListener(grabbers[i]->videoResized, this, &ofApp::videoResized);
-			std::shared_ptr<Video::IPVideoGrabber> c = std::make_shared<Video::IPVideoGrabber>();
+			auto c = std::make_shared<Video::IPVideoGrabber>();
             IPCameraDef& cam = getNextCamera();
             c->setUsername(cam.getUsername());
             c->setPassword(cam.getPassword());

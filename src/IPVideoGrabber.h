@@ -1,6 +1,6 @@
 // =============================================================================
 //
-// Copyright (c) 2009-2013 Christopher Baker <http://christopherbaker.net>
+// Copyright (c) 2009-2016 Christopher Baker <http://christopherbaker.net>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -26,36 +26,20 @@
 #pragma once
 
 
-#include <iostream>
-#include "ofMain.h"
-#include "Poco/Exception.h"
-#include "Poco/Path.h"
-#include "Poco/StreamTokenizer.h"
-#include "Poco/StreamCopier.h"
-#include "Poco/UTF8String.h"
-#include "Poco/ScopedLock.h"
-#include "Poco/Token.h"
+#include <atomic>
 #include "Poco/URI.h"
-#include "Poco/Net/HTTPBasicCredentials.h"
 #include "Poco/Net/HTTPClientSession.h"
-#include "Poco/Net/HTTPCookie.h"
-#include "Poco/Net/HTTPRequest.h"
-#include "Poco/Net/HTTPResponse.h"
-#include "Poco/Net/HTTPStreamFactory.h"
-#include "Poco/Net/MessageHeader.h"
 #include "Poco/Net/NameValueCollection.h"
-#include "Poco/Net/NetException.h"
+#include "ofBaseTypes.h"
 
 
 namespace ofx {
 namespace Video {
 
 
-class IPVideoGrabber: public ofBaseVideoDraws, protected ofThread
+class IPVideoGrabber: public ofBaseVideoDraws
 {
 public:
-    typedef std::shared_ptr<IPVideoGrabber> SharedPtr;
-    
     IPVideoGrabber();
     virtual ~IPVideoGrabber();
 
@@ -164,9 +148,9 @@ public:
     uint64_t getReconnectTimeout() const;
     bool getNeedsReconnect() const;
     bool getAutoReconnect() const;
-    uint64_t getReconnectCount() const;
-    uint64_t getMaxReconnects() const;
-    void setMaxReconnects(uint64_t num);
+    int getReconnectCount() const;
+    int getMaxReconnects() const;
+    void setMaxReconnects(int num);
     uint64_t getAutoRetryDelay() const;
     void setAutoRetryDelay(uint64_t delay_ms);
     uint64_t getNextAutoRetryTime() const;
@@ -178,10 +162,18 @@ public:
     ofEvent<ofResizeEventArgs> 	videoResized;
 
 protected:    
-    void threadedFunction() override;// connect to server
+    void threadedFunction();// override;// connect to server
     void imageResized(int width, int height);
     
 private:
+    std::thread _thread;
+
+#if OF_VERSION_MAJOR < 1 && OF_VERSION_MINOR >= 10
+    ofEventListener _exitListener;
+#endif
+
+    std::atomic<bool> _isConnected;
+
     std::string defaultBoundaryMarker_a;
     
     std::string cameraName_a;
@@ -201,7 +193,7 @@ private:
     int ci; // current image index
     ofPixels image_a[2]; // image double buffer.  this flips
     std::shared_ptr<ofImage> img;
-	mutable std::vector<ofTexture> tex;
+	mutable std::vector<ofTexture> texPlanes;
 
     bool isNewFrameLoaded;       // is there a new frame ready to be uploaded to glspace
     bool isBackBufferReady_a;
@@ -219,20 +211,20 @@ private:
     uint64_t lastValidBitrateTime; // the time of the last valid bitrate (will wait for reconnectTime time)
     uint64_t reconnectTimeout; // ms the amount ot time we will wait to reach the min bitrate
     
-    
     uint64_t autoRetryDelay_a; // retry delay in ms
     uint64_t nextAutoRetry_a;
     bool connectionFailure; // max reconnects exceeded, is dead.
     bool needsReconnect_a; // needs reconnecting
     bool autoReconnect;  // should automatically reconnect
-    uint64_t reconnectCount_a; // the number of reconnects attempted
-    uint64_t maxReconnects;  // the maximum number of reconnect attempts that will be made
+    int reconnectCount_a; // the number of reconnects attempted
+    int maxReconnects;  // the maximum number of reconnect attempts that will be made
 
-    
     uint64_t sessionTimeout; // ms
     Poco::URI uri_a;
     
     Poco::Net::NameValueCollection cookies;
+
+    mutable std::mutex mutex;
 
 	const static std::size_t MIN_JPEG_SIZE;
 	const static std::size_t BUF_LEN;
@@ -240,9 +232,6 @@ private:
 	const static char SOI;
 	const static char EOI;
 };
-
-
-typedef IPVideoGrabber::SharedPtr SharedIPVideoGrabber;
 
 
 } } // namespace ofx::Video
