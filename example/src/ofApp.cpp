@@ -205,7 +205,6 @@ void ofApp::draw()
         {
             col = (col + 1) % NUM_COLS;
         }
-
         
         ofPushMatrix();
         ofTranslate(x,y);
