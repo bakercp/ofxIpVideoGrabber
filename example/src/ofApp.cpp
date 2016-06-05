@@ -37,24 +37,29 @@ void ofApp::setup()
     {
         IPCameraDef& cam = getNextCamera();
 
-	std::shared_ptr<Video::IPVideoGrabber> c = std::make_shared<Video::IPVideoGrabber>();
+        auto grabber = std::make_shared<Video::IPVideoGrabber>();
 
-        // if your camera uses standard web-based authentication, use this
-        // c->setUsername(cam.username);
-        // c->setPassword(cam.password);
-        
-        // if your camera uses cookies for authentication, use something like this:
-        // c->setCookie("user", cam.username);
-        // c->setCookie("password", cam.password);
-        
-        c->setCameraName(cam.getName());
-        c->setURI(cam.getURL());
-        c->connect(); // connect immediately
+        if (cam.getAuthType() == IPCameraDef::AuthType::COOKIE)
+        {
+            // Depending on the system, the cookie name may need to be changed.
+            grabber->setCookie("user", cam.getUsername());
+            grabber->setCookie("password", cam.getPassword());
+        }
+        else if (cam.getAuthType() == IPCameraDef::AuthType::BASIC)
+        {
+            grabber->setUsername(cam.getUsername());
+            grabber->setPassword(cam.getPassword());
+        }
+
+
+        grabber->setCameraName(cam.getName());
+        grabber->setURI(cam.getURL());
+        grabber->connect(); // connect immediately
 
         // if desired, set up a video resize listener
-        ofAddListener(c->videoResized, this, &ofApp::videoResized);
+        ofAddListener(grabber->videoResized, this, &ofApp::videoResized);
         
-        grabbers.push_back(c);
+        grabbers.push_back(grabber);
 
     }
 }
@@ -89,22 +94,44 @@ void ofApp::loadCameras()
 	std::size_t nCams = static_cast<std::size_t>(XML.getNumTags(tag));
 		
 	for (std::size_t n = 0; n < nCams; ++n)
+    {
+        std::string username = XML.getAttribute(tag, "username", "", n);
+        std::string password = XML.getAttribute(tag, "password", "", n);
+
+        std::string auth = XML.getAttribute(tag, "auth-type", "NONE", n);
+
+        IPCameraDef::AuthType authType = IPCameraDef::AuthType::NONE;
+
+        if (auth.compare("NONE") == 0)
         {
-            IPCameraDef def(XML.getAttribute(tag, "name", "", n),
-                            XML.getAttribute(tag, "url", "", n),
-                            XML.getAttribute(tag, "username", "", n),
-                            XML.getAttribute(tag, "password", "", n));
+            authType = IPCameraDef::AuthType::NONE;
+        }
+        else if (auth.compare("BASIC") == 0)
+        {
+            authType = IPCameraDef::AuthType::BASIC;
+        }
+        else if (auth.compare("COOKIE") == 0)
+        {
+            authType = IPCameraDef::AuthType::COOKIE;
+        }
+
+        IPCameraDef def(XML.getAttribute(tag, "name", "", n),
+                        XML.getAttribute(tag, "url", "", n),
+                        username,
+                        password,
+                        authType);
 
 
-            std::string logMessage = "STREAM LOADED: " + def.getName() +
-			" url: " +  def.getURL() +
-			" username: " + def.getUsername() +
-			" password: " + def.getPassword();
-            
-            ofLogNotice() << logMessage;
-            
-            ipcams.push_back(def);
-            
+        std::string logMessage = "STREAM LOADED: " + def.getName() +
+        " url: " +  def.getURL() +
+        " username: " + def.getUsername() +
+        " password: " + def.getPassword() +
+        " auth: " + std::to_string(static_cast<int>((def.getAuthType())));
+
+        ofLogNotice() << logMessage;
+        
+        ipcams.push_back(def);
+        
 	}
 		
 	XML.popTag();

@@ -45,6 +45,12 @@
 class IPCameraDef
 {
 public:
+    enum AuthType {
+        NONE,
+        BASIC,
+        COOKIE
+    };
+
     IPCameraDef()
     {
     }
@@ -56,11 +62,13 @@ public:
     IPCameraDef(const std::string& name,
                 const std::string& url,
                 const std::string& username,
-                const std::string& password):
+                const std::string& password,
+                const AuthType authType):
         _name(name),
         _url(url),
         _username(username),
-        _password(password)
+        _password(password),
+        _authType(authType)
     {
     }
 
@@ -76,12 +84,15 @@ public:
     void setPassword(const std::string& password) { _password = password; }
     std::string getPassword() const { return _password; }
 
-
+    void setAuthType(AuthType authType) { _authType = authType; }
+    AuthType getAuthType() const { return _authType; }
+    
 private:
     std::string _name;
     std::string _url;
     std::string _username;
     std::string _password;
+    AuthType _authType = NONE;
 };
 
 
