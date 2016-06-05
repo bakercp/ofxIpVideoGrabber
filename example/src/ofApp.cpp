@@ -45,12 +45,11 @@ void ofApp::setup()
             grabber->setCookie("user", cam.getUsername());
             grabber->setCookie("password", cam.getPassword());
         }
-        else if (cam.getAuthType() == IPCameraDef::AuthType::BASIC)
+        else if (!cam.getUsername().empty() || !cam.getPassword().empty())
         {
             grabber->setUsername(cam.getUsername());
             grabber->setPassword(cam.getPassword());
         }
-
 
         grabber->setCameraName(cam.getName());
         grabber->setURI(cam.getURL());
