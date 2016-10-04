@@ -81,7 +81,7 @@ public:
     // ofBaseDraws
     void draw(float x, float y) const override;
 	void draw(float x, float y, float w, float h) const override;
-	void draw(const ofPoint& point) const override;
+	void draw(const glm::vec3& point) const override;
 	void draw(const ofRectangle& rect) const override;
     
     void setAnchorPercent(float xPct, float yPct) override;

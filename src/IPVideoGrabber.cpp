@@ -617,7 +617,7 @@ void IPVideoGrabber::threadedFunction()
                         }
                         else if (cBuf[c] == EOI)
                         {
-                            buffer = ofBuffer(cBuf.begin(), c+1);
+                            buffer = ofBuffer(cBuf.begin(), c + 1);
 
                             if (c >= MIN_JPEG_SIZE)
                             { // some cameras send 2+ EOIs in a row, with no valid bytes in between
@@ -854,7 +854,7 @@ void IPVideoGrabber::draw(float x, float y, float width, float height) const
 }
 
 
-void IPVideoGrabber::draw(const ofPoint& point) const
+void IPVideoGrabber::draw(const glm::vec3& point) const
 {
     draw(point.x, point.y);
 }
