@@ -28,6 +28,9 @@
 
 void ofApp::setup()
 {
+    ofSetWindowShape(ofGetScreenWidth(), ofGetScreenHeight());
+    ofHideCursor();
+
 //    ofSetLogLevel(OF_LOG_VERBOSE);
     ofSetFrameRate(30);
     loadCameras();
