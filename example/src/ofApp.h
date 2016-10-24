@@ -27,14 +27,17 @@
 
 
 #include "ofMain.h"
-#include "ofxXmlSettings.h"
+//#include "ofxXmlSettings.h"
 #include "IPVideoGrabber.h"
 
 
 //#if defined(TARGET_OF_IPHONE) || defined(TARGET_ANDROID) || defined(TARGET_LINUX_ARM)
-    #define NUM_CAMERAS 1
-    #define NUM_ROWS 1
-    #define NUM_COLS 1
+//#define NUM_CAMERAS 1
+//#define NUM_ROWS 1
+//#define NUM_COLS 1
+#define NUM_CAMERAS 9
+#define NUM_ROWS 3
+#define NUM_COLS 3
 //#else
 //    #define NUM_CAMERAS 9
 //    #define NUM_ROWS 3

@@ -28,7 +28,7 @@
 
 void ofApp::setup()
 {
-    ofSetLogLevel(OF_LOG_VERBOSE);
+//    ofSetLogLevel(OF_LOG_VERBOSE);
     ofSetFrameRate(30);
     loadCameras();
     
@@ -81,68 +81,50 @@ void ofApp::loadCameras()
     // to define a camera with a username / password
     //ipcams.push_back(IPCameraDef("http://148.61.142.228/axis-cgi/mjpg/video.cgi", "username", "password"));
 
-    ofLog(OF_LOG_NOTICE, "---------------Loading Streams---------------");
+    ofLogNotice("ofApp::loadCameras") << "---------------Loading Streams---------------";
 
-    ofxXmlSettings XML;
-    
-    if (XML.loadFile("streams.xml"))
+    ofJson streams = ofLoadJson("streams.json");
+
+    for (auto& stream: streams)
     {
-        XML.pushTag("streams");
-        std::string tag = "stream";
-		
-        std::size_t nCams = static_cast<std::size_t>(XML.getNumTags(tag));
-		
-        for (std::size_t n = 0; n < nCams; ++n)
-        {
-        std::string username = XML.getAttribute(tag, "username", "", n);
-        std::string password = XML.getAttribute(tag, "password", "", n);
-
-        std::string auth = XML.getAttribute(tag, "auth-type", "NONE", n);
+        std::string auth = stream.value("auth-type", "NONE");
 
         IPCameraDef::AuthType authType = IPCameraDef::AuthType::NONE;
 
-        if (auth.compare("NONE") == 0)
+        if (auth == "NONE")
         {
             authType = IPCameraDef::AuthType::NONE;
         }
-        else if (auth.compare("BASIC") == 0)
+        else if (auth == "BASIC")
         {
             authType = IPCameraDef::AuthType::BASIC;
         }
-        else if (auth.compare("COOKIE") == 0)
+        else if (auth == "COOKIE")
         {
             authType = IPCameraDef::AuthType::COOKIE;
         }
 
-        IPCameraDef def(XML.getAttribute(tag, "name", "", n),
-                        XML.getAttribute(tag, "url", "", n),
-                        username,
-                        password,
+        IPCameraDef def(stream.value("name", ""),
+                        stream.value("url", ""),
+                        stream.value("username", ""),
+                        stream.value("password", ""),
                         authType);
 
+        std::stringstream ss;
 
-        std::string logMessage = "STREAM LOADED: " + def.getName() +
-        " url: " +  def.getURL() +
-        " username: " + def.getUsername() +
-        " password: " + def.getPassword() +
-        " auth: " + std::to_string(static_cast<int>((def.getAuthType())));
+        ss << "STREAM LOADED: " <<  def.getName();
+        ss << " url: " +  def.getURL();
+        ss << " username: " + def.getUsername();
+        ss << " password: " + def.getPassword();
+        ss << " auth: " + std::to_string(static_cast<int>((def.getAuthType())));
+        ofLogNotice() << ss.str();
 
-        ofLogNotice() << logMessage;
-        
         ipcams.push_back(def);
         
 	}
-		
-	XML.popTag();
+	
+    ofLogNotice("ofApp::loadCameras") << "-----------Loading Streams Complete----------";
 
-    }
-    else
-    {
-		ofLog(OF_LOG_ERROR, "Unable to load streams.xml.");
-    }
-    
-    ofLog(OF_LOG_NOTICE, "-----------Loading Streams Complete----------");
-    
     nextCamera = ipcams.size();
 }
 
@@ -213,8 +195,8 @@ void ofApp::draw()
         ofEnableAlphaBlending();
         
         // draw the info box
-        ofSetColor(0,80);
-        ofDrawRectangle(5,5,w-10,h-10);
+        //ofSetColor(0,80);
+        //ofDrawRectangle(5,5,w-10,h-10);
         
         float kbps = grabbers[i]->getBitRate() / 1000.0f; // kilobits / second, not kibibits / second
         totalKbps+=kbps;
