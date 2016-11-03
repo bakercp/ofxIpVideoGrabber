@@ -26,123 +26,18 @@
 #pragma once
 
 
-#include <atomic>
-#include <string>
-#include "Poco/URI.h"
-#include "Poco/Net/HTTPClientSession.h"
-#include "Poco/Net/NameValueCollection.h"
-#include "ofJson.h"
-#include "ofBaseTypes.h"
+#include "ofx/Video/StreamingGrabber.h"
 
 
 namespace ofx {
 namespace Video {
 
 
-class IpVideoGrabberSettings
+class MJPEGVideoGrabber: public StreamingGrabber
 {
 public:
-    enum class AuthType
-    {
-        NONE,
-        BASIC,
-        COOKIE
-    };
-
-    IpVideoGrabberSettings()
-    {
-    }
-
-    IpVideoGrabberSettings(const std::string& url): _url(url)
-    {
-    }
-
-    IpVideoGrabberSettings(const std::string& name,
-                           const std::string& url,
-                           const std::string& username,
-                           const std::string& password,
-                           const AuthType authType):
-        _name(name),
-        _url(url),
-        _username(username),
-        _password(password),
-        _authType(authType)
-    {
-    }
-
-    void setName(const std::string& name) { _name = name; }
-    std::string getName() const { return _name; }
-
-    void setURL(const std::string& url) { _url = url; }
-    std::string getURL() const { return _url; }
-
-    void setUsername(const std::string& username) { _username = username; }
-    std::string getUsername() const { return _username; }
-
-    void setPassword(const std::string& password) { _password = password; }
-    std::string getPassword() const { return _password; }
-
-    void setAuthType(AuthType authType) { _authType = authType; }
-    AuthType getAuthType() const { return _authType; }
-
-
-    static IpVideoGrabberSettings fromJSON(const ofJson& json)
-    {
-        IpVideoGrabberSettings stream;
-
-        std::string auth = json.value("auth-type", "NONE");
-
-        IpVideoGrabberSettings::AuthType authType = IpVideoGrabberSettings::AuthType::NONE;
-
-        if (auth == "NONE")
-        {
-            authType = IpVideoGrabberSettings::AuthType::NONE;
-        }
-        else if (auth == "BASIC")
-        {
-            authType = IpVideoGrabberSettings::AuthType::BASIC;
-        }
-        else if (auth == "COOKIE")
-        {
-            authType = IpVideoGrabberSettings::AuthType::COOKIE;
-        }
-
-        return IpVideoGrabberSettings(json.value("name", ""),
-                                      json.value("url", ""),
-                                      json.value("username", ""),
-                                      json.value("password", ""),
-                                      authType);
-    }
-
-    static std::vector<IpVideoGrabberSettings> fromFile(const std::string& json)
-    {
-        std::vector<IpVideoGrabberSettings> cams;
-
-        ofJson streams = ofLoadJson(json);
-
-        for (auto& stream: streams)
-        {
-            cams.push_back(fromJSON(stream));
-        }
-
-        return cams;
-    }
-
-private:
-    std::string _name;
-    std::string _url;
-    std::string _username;
-    std::string _password;
-    AuthType _authType = AuthType::NONE;
-
-};
-
-
-class IPVideoGrabber: public ofBaseVideoDraws
-{
-public:
-    IPVideoGrabber();
-    virtual ~IPVideoGrabber();
+    MJPEGVideoGrabber();
+    virtual ~MJPEGVideoGrabber();
 
     void setup(const IpVideoGrabberSettings& settings);
 
