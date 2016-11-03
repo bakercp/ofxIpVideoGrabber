@@ -30,109 +30,47 @@ void ofApp::setup()
 {
 //    ofSetLogLevel(OF_LOG_VERBOSE);
     ofSetFrameRate(30);
-    loadCameras();
-    
-    // initialize connection
-    for (std::size_t i = 0; i < NUM_CAMERAS; i++)
-    {
-        IPCameraDef& cam = getNextCamera();
 
-        auto grabber = std::make_shared<Video::IPVideoGrabber>();
+    ipcams = Video::IpVideoGrabberSettings::fromFile("streams.json");
 
-        if (cam.getAuthType() == IPCameraDef::AuthType::COOKIE)
-        {
-            // Depending on the system, the cookie name may need to be changed.
-            grabber->setCookie("user", cam.getUsername());
-            grabber->setCookie("password", cam.getPassword());
-        }
-        else if (!cam.getUsername().empty() || !cam.getPassword().empty())
-        {
-            grabber->setUsername(cam.getUsername());
-            grabber->setPassword(cam.getPassword());
-        }
+    ofLogNotice("ofApp::setup()") << "Loaded " << ipcams.size() << " locations.";
 
-        grabber->setCameraName(cam.getName());
-        grabber->setURI(cam.getURL());
-        grabber->connect(); // connect immediately
+    reloadCameras();
 
-        // if desired, set up a video resize listener
-        ofAddListener(grabber->videoResized, this, &ofApp::videoResized);
-        
-        grabbers.push_back(grabber);
-
-    }
 }
 
 
-IPCameraDef& ofApp::getNextCamera()
+Video::IpVideoGrabberSettings& ofApp::getNextCamera()
 {
     nextCamera = (nextCamera + 1) % ipcams.size();
     return ipcams[nextCamera];
 }
 
 
-void ofApp::loadCameras()
+void ofApp::reloadCameras()
 {
-    
-    // all of these cameras were found using this google query
-    // http://www.google.com/search?q=inurl%3A%22axis-cgi%2Fmjpg%22
-    // some of the cameras below may no longer be valid.
-    
-    // to define a camera with a username / password
-    //ipcams.push_back(IPCameraDef("http://148.61.142.228/axis-cgi/mjpg/video.cgi", "username", "password"));
+    // Clear the grabbers.
+    grabbers.clear();
 
-    ofLogNotice("ofApp::loadCameras") << "---------------Loading Streams---------------";
-
-    ofJson streams = ofLoadJson("streams.json");
-
-    for (auto& stream: streams)
+    // Initialize new grabbers.
+    for (std::size_t i = 0; i < numCameras; ++i)
     {
-        std::string auth = stream.value("auth-type", "NONE");
+        auto c = std::make_shared<Video::IPVideoGrabber>();
+        auto& settings = getNextCamera();
+        c->setUsername(settings.getUsername());
+        c->setPassword(settings.getPassword());
+        c->setURI(settings.getURL());
+        c->connect();
 
-        IPCameraDef::AuthType authType = IPCameraDef::AuthType::NONE;
-
-        if (auth == "NONE")
-        {
-            authType = IPCameraDef::AuthType::NONE;
-        }
-        else if (auth == "BASIC")
-        {
-            authType = IPCameraDef::AuthType::BASIC;
-        }
-        else if (auth == "COOKIE")
-        {
-            authType = IPCameraDef::AuthType::COOKIE;
-        }
-
-        IPCameraDef def(stream.value("name", ""),
-                        stream.value("url", ""),
-                        stream.value("username", ""),
-                        stream.value("password", ""),
-                        authType);
-
-        std::stringstream ss;
-
-        ss << "STREAM LOADED: " <<  def.getName();
-        ss << " url: " +  def.getURL();
-        ss << " username: " + def.getUsername();
-        ss << " password: " + def.getPassword();
-        ss << " auth: " + std::to_string(static_cast<int>((def.getAuthType())));
-        ofLogNotice() << ss.str();
-
-        ipcams.push_back(def);
-        
-	}
-	
-    ofLogNotice("ofApp::loadCameras") << "-----------Loading Streams Complete----------";
-
-    nextCamera = ipcams.size();
+        grabbers.push_back(c);;
+    }
 }
 
 
 void ofApp::videoResized(const void* sender, ofResizeEventArgs& arg)
 {
     // Find the camera that sent the resize event changed.
-    for (std::size_t i = 0; i < NUM_CAMERAS; ++i)
+    for (std::size_t i = 0; i < numCameras; ++i)
     {
         if (sender == grabbers[i].get())
         {
@@ -148,10 +86,9 @@ void ofApp::videoResized(const void* sender, ofResizeEventArgs& arg)
 
 void ofApp::update()
 {
-    // update the cameras
-    for (std::size_t i = 0; i < grabbers.size(); ++i)
+    for (auto& grabber: grabbers)
     {
-        grabbers[i]->update();
+        grabber->update();
     }
 }
 
@@ -162,14 +99,14 @@ void ofApp::draw()
 
     ofSetHexColor(0xffffff);
     
-    int row = 0;
-    int col = 0;
+    std::size_t row = 0;
+    std::size_t col = 0;
     
-    int x = 0;
-    int y = 0;
+    float x = 0;
+    float y = 0;
     
-    int w = ofGetWidth() / NUM_COLS;
-    int h = ofGetHeight() / NUM_ROWS;
+    float w = ofGetWidth() / numCameraColumns;
+    float h = ofGetHeight() / numCameraRows;
     
     float totalKbps = 0;
     float totalFPS = 0;
@@ -180,11 +117,11 @@ void ofApp::draw()
         y = row * h;
 
         // draw in a grid
-        row = (row + 1) % NUM_ROWS;
+        row = (row + 1) % numCameraRows;
 
         if (row == 0)
         {
-            col = (col + 1) % NUM_COLS;
+            col = (col + 1) % numCameraColumns;
         }
         
         ofPushMatrix();
@@ -229,8 +166,8 @@ void ofApp::draw()
     }
     
     // keep track of some totals
-    float avgFPS = totalFPS / NUM_CAMERAS;
-    float avgKbps = totalKbps / NUM_CAMERAS;
+    float avgFPS = totalFPS / numCameras;
+    float avgKbps = totalKbps / numCameras;
 
     ofEnableAlphaBlending();
     ofSetColor(0,80);
@@ -246,24 +183,10 @@ void ofApp::draw()
     ofDrawBitmapString("Press Spacebar for next Video", 10, ofGetHeight() - 14);
 }
 
-
 void ofApp::keyPressed(int key)
 {
     if (key == ' ')
     {
-        // initialize connection
-        for (std::size_t i = 0; i < NUM_CAMERAS; ++i)
-        {
-            ofRemoveListener(grabbers[i]->videoResized, this, &ofApp::videoResized);
-			auto c = std::make_shared<Video::IPVideoGrabber>();
-            IPCameraDef& cam = getNextCamera();
-            c->setUsername(cam.getUsername());
-            c->setPassword(cam.getPassword());
-            Poco::URI uri(cam.getURL());
-            c->setURI(uri);
-            c->connect();
-            
-            grabbers[i] = c;
-        }
+        reloadCameras();
     }
 }

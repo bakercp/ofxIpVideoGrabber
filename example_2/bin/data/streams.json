@@ -1,4 +1,3 @@
 [
-  { "url": "http://192.168.0.106:7890/ipvideo" },
-  { "url": "http://192.168.0.104:7890/ipvideo" }
+  { "url": "http://85.221.20.19/axis-cgi/mjpg/video.cgi?resolution=320x240" }
 ]
