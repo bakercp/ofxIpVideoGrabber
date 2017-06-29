@@ -1,8 +1,8 @@
-#ofxIpVideoGrabber
+# ofxIpVideoGrabber
 
 ![Screenshot](https://github.com/bakercp/ofxIpVideoGrabber/raw/master/screen.png)
 
-#Description
+# Description
 
 ofxIpVideoGrabber is an Open Frameworks addon used to capture video streams from IP Cameras that use the mjpeg streaming protocol.  Public cameras can be found with a google search like this:
 
@@ -14,7 +14,7 @@ OpenFrameworks is a cross platform open source toolkit for creative coding in C+
 
 [http://www.openframeworks.cc/](http://www.openframeworks.cc/)
 
-#Installation
+# Installation
 
 To use ofxIpVideoGrabber, first you need to download and install [Open Frameworks](https://github.com/openframeworks/openFrameworks).
 
@@ -34,17 +34,17 @@ The master branch should be is stable.  New features, etc are in the `develop` b
 
 For past releases see https://github.com/bakercp/ofxIpVideoGrabber/releases
 
-#Dependencies
+# Dependencies
 
 None
 
-#Compatability
+# Compatability
 
  Edimax IC-3005
  Axis Cameras
  and others.
 
-#How Do I Find Cameras?
+# How Do I Find Cameras?
 
 You might try some of the following Google Searches:
 
@@ -91,14 +91,14 @@ intitle:”netcam live image”
 intitle:”i-Catcher Console – Web Monitor”
 ```
 
-#Alternatives
+# Alternatives
 
 If you are interested in using these cameras with Processing or Max/MSP/Jitter, you can find code here: [https://github.com/themaw/mawLib/tree/master/src/mxj/trunk/mawLib-mxj/src/maw/jit/ipcam](https://github.com/themaw/mawLib/tree/master/src/mxj/trunk/mawLib-mxj/src/maw/jit/ipcam).  It is part of mawLib and includes pan/tilt, etc control code.
 
 You might also check out [IPCAM2SYPHON](https://github.com/bakercp/IPCAM2SYPHON).  It wraps this library and sends cam textures via [Syphon](http://syphon.v002.info/).
 
-#License
-Copyright (c) 2011-2016 Christopher Baker <http://christopherbaker.net>
+# License
+Copyright (c) 2011-2016 Christopher Baker <https://christopherbaker.net>
 
 MIT License.
 
