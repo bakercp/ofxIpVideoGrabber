@@ -1,50 +1,30 @@
-#ofxIpVideoGrabber
+# ofxIpVideoGrabber
 
 ![Screenshot](https://github.com/bakercp/ofxIpVideoGrabber/raw/master/screen.png)
 
-#Description
+## Description
 
-ofxIpVideoGrabber is an Open Frameworks addon used to capture video streams from IP Cameras that use the mjpeg streaming protocol.  Public cameras can be found with a google search like this:
+ofxIpVideoGrabber is an Open Frameworks addon used to capture video streams from IP Cameras that use the mjpeg streaming protocol. Public cameras can be found with a google search like this:
 
-http://www.google.com/search?q=inurl%3A%22axis-cgi%2Fmjpg%22
+[http://www.google.com/search?q=inurl%3A%22axis-cgi%2Fmjpg%22](http://www.google.com/search?q=inurl%3A%22axis-cgi%2Fmjpg%22)
 
 See others examples below.
 
-OpenFrameworks is a cross platform open source toolkit for creative coding in C++.
+## Getting Started
 
-[http://www.openframeworks.cc/](http://www.openframeworks.cc/)
+To get started, generate the example project files using the openFrameworks [Project Generator](http://openframeworks.cc/learning/01_basics/how_to_add_addon_to_project/).
 
-#Installation
+### Compatability
 
-To use ofxIpVideoGrabber, first you need to download and install [Open Frameworks](https://github.com/openframeworks/openFrameworks).
+- Edimax IC-3005
+- Axis Cameras
+- [mjpeg-streamer](https://github.com/jacksonliam/mjpg-streamer) for Raspiberry Pi, etc.
+- [ofxHTTP MJPEG Server](https://github.com/bakercp/ofxHTTP/tree/master/example_basic_server_mjpeg_video)
+- Many others.
 
-To get a copy of the repository you can download the source from [http://github.com/bakercp/ofxIpVideoGrabber](http://github.com/bakercp/ofxIpVideoGrabber) or, alternatively, you can use git clone:
+_Note: This is not compatible with H264 streams that can be found on many modern cameras. For H264 cameras, consider [ofxGStreamer](https://github.com/arturoc/ofxGStreamer)._
 
-```
-git clone git://github.com/bakercp/ofxIpVideoGrabber.git`
-```
-
-The addon should sit in `openFrameworks/addons/ofxIpVideoGrabber/`.
-
-#### Which version to use?
-
-ofxIpVideoGrabber has been tested with the latest development version of openFrameworks including 0.9.0+.
-
-The master branch should be is stable.  New features, etc are in the `develop` branch.
-
-For past releases see https://github.com/bakercp/ofxIpVideoGrabber/releases
-
-#Dependencies
-
-None
-
-#Compatability
-
- Edimax IC-3005
- Axis Cameras
- and others.
-
-#How Do I Find Cameras?
+### How Do I Find Cameras?
 
 You might try some of the following Google Searches:
 
@@ -91,16 +71,38 @@ intitle:”netcam live image”
 intitle:”i-Catcher Console – Web Monitor”
 ```
 
-#Alternatives
+## Documentation
 
-If you are interested in using these cameras with Processing or Max/MSP/Jitter, you can find code here: [https://github.com/themaw/mawLib/tree/master/src/mxj/trunk/mawLib-mxj/src/maw/jit/ipcam](https://github.com/themaw/mawLib/tree/master/src/mxj/trunk/mawLib-mxj/src/maw/jit/ipcam).  It is part of mawLib and includes pan/tilt, etc control code.
+API documentation can be found here.
 
-You might also check out [IPCAM2SYPHON](https://github.com/bakercp/IPCAM2SYPHON).  It wraps this library and sends cam textures via [Syphon](http://syphon.v002.info/).
+## Build Status
 
-#License
-Copyright (c) 2011-2016 Christopher Baker <http://christopherbaker.net>
+Linux, macOS [![Build Status](https://travis-ci.org/bakercp/ofxIpVideoGrabber.svg?branch=master)](https://travis-ci.org/bakercp/ofxIpVideoGrabber)
 
-MIT License.
+Visual Studio, MSYS (Not tested recently, but working in the past).
 
-For information on usage and redistribution, and for a DISCLAIMER OF ALL
-WARRANTIES, see the file, "LICENSE.txt," in this distribution.
+## Compatibility
+
+The `stable` branch of this repository is meant to be compatible with the openFrameworks [stable branch](https://github.com/openframeworks/openFrameworks/tree/stable), which corresponds to the latest official openFrameworks release.
+
+The `master` branch of this repository is meant to be compatible with the openFrameworks [master branch](https://github.com/openframeworks/openFrameworks/tree/master).
+
+Some past openFrameworks releases are supported via tagged versions, but only `stable` and `master` branches are actively supported.
+
+## Versioning
+
+This project uses Semantic Versioning, although strict adherence will only come into effect at version 1.0.0.
+
+## Licensing
+
+See `LICENSE.md`.
+
+## Contributing
+
+Pull Requests are always welcome, so if you make any improvements please feel free to float them back upstream :)
+
+1. Fork this repository.
+2. Create your feature branch (`git checkout -b my-new-feature`).
+3. Commit your changes (`git commit -am 'Add some feature'`).
+4. Push to the branch (`git push origin my-new-feature`).
+5. Create new Pull Request.
