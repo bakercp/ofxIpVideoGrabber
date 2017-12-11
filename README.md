@@ -18,7 +18,7 @@ To get started, generate the example project files using the openFrameworks [Pro
 
 - Edimax IC-3005
 - Axis Cameras
-- [mjpeg-streamer](https://github.com/jacksonliam/mjpg-streamer) for Raspiberry Pi, etc.
+- [mjpeg-streamer](https://github.com/jacksonliam/mjpg-streamer) for Raspberry Pi, etc.
 - [ofxHTTP MJPEG Server](https://github.com/bakercp/ofxHTTP/tree/master/example_basic_server_mjpeg_video)
 - Many others.
 
@@ -79,7 +79,7 @@ API documentation can be found here.
 
 Linux, macOS [![Build Status](https://travis-ci.org/bakercp/ofxIpVideoGrabber.svg?branch=master)](https://travis-ci.org/bakercp/ofxIpVideoGrabber)
 
-Visual Studio, MSYS (Not tested recently, but working in the past).
+Visual Studio, MSYS [![Build Status](https://ci.appveyor.com/api/projects/status/5bgnl359v69hxaba/branch/master?svg=true)](https://ci.appveyor.com/project/bakercp/ofxipvideograbber/branch/master)
 
 ## Compatibility
 
