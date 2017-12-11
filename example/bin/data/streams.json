@@ -1,0 +1,5 @@
+[
+    { "url": "http://195.200.199.8/axis-cgi/mjpg/video.cgi?resolution=320x240" },
+    { "url": "http://107.1.228.34/axis-cgi/mjpg/video.cgi?resolution=320x240" },
+    { "url": "http://webcam.st-malo.com/axis-cgi/mjpg/video.cgi?resolution=320x240" }
+]
