@@ -1,4 +1,0 @@
-ofxIO
-ofxIpVideoGrabber
-ofxPoco
-ofxVideo
