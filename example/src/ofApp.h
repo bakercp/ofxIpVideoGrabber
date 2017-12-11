@@ -30,9 +30,6 @@
 #include "IPVideoGrabber.h"
 
 
-using namespace ofx;
-
-
 class ofApp: public ofBaseApp
 {
 public:
@@ -42,11 +39,11 @@ public:
     
     void keyPressed(int key);
 
-    std::vector<std::shared_ptr<Video::IPVideoGrabber>> grabbers;
+    std::vector<std::shared_ptr<ofx::Video::IPVideoGrabber>> grabbers;
 
     void reloadCameras();
-    Video::IpVideoGrabberSettings& getNextCamera();
-    std::vector<Video::IpVideoGrabberSettings> ipcams; // a list of IPCameras
+    ofx::Video::IpVideoGrabberSettings& getNextCamera();
+    std::vector<ofx::Video::IpVideoGrabberSettings> ipcams; // a list of IPCameras
     std::size_t nextCamera = 0;
 
     // This message occurs when the incoming video stream image size changes. 

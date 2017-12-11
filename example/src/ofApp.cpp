@@ -31,7 +31,7 @@ void ofApp::setup()
 //    ofSetLogLevel(OF_LOG_VERBOSE);
     ofSetFrameRate(30);
 
-    ipcams = Video::IpVideoGrabberSettings::fromFile("streams.json");
+    ipcams = ofx::Video::IpVideoGrabberSettings::fromFile("streams.json");
 
     ofLogNotice("ofApp::setup()") << "Loaded " << ipcams.size() << " locations.";
 
@@ -40,7 +40,7 @@ void ofApp::setup()
 }
 
 
-Video::IpVideoGrabberSettings& ofApp::getNextCamera()
+ofx::Video::IpVideoGrabberSettings& ofApp::getNextCamera()
 {
     nextCamera = (nextCamera + 1) % ipcams.size();
     return ipcams[nextCamera];
@@ -55,7 +55,7 @@ void ofApp::reloadCameras()
     // Initialize new grabbers.
     for (std::size_t i = 0; i < numCameras; ++i)
     {
-        auto c = std::make_shared<Video::IPVideoGrabber>();
+        auto c = std::make_shared<ofx::Video::IPVideoGrabber>();
         auto& settings = getNextCamera();
         c->setUsername(settings.getUsername());
         c->setPassword(settings.getPassword());

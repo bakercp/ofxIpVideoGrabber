@@ -139,7 +139,7 @@ void IPVideoGrabber::update()
 {
     isNewFrameLoaded = false;
 
-    uint64_t now = ofGetSystemTime();
+    uint64_t now = ofGetSystemTimeMillis();
     
     std::string cName = getCameraName(); // consequence of scoped locking
     
@@ -398,7 +398,7 @@ uint64_t IPVideoGrabber::getTimeTillNextAutoRetry() const
 {
     std::unique_lock<std::mutex> lock(mutex);
 
-    auto now = ofGetSystemTime();
+    auto now = ofGetSystemTimeMillis();
 
     if (nextAutoRetry_a == 0 or now >= nextAutoRetry_a)
     {
@@ -406,7 +406,7 @@ uint64_t IPVideoGrabber::getTimeTillNextAutoRetry() const
     }
     else
     {
-        return nextAutoRetry_a - ofGetSystemTime();
+        return nextAutoRetry_a - ofGetSystemTimeMillis();
     }
 }
 
@@ -443,7 +443,7 @@ void IPVideoGrabber::threadedFunction()
 	mutex.lock(); // LOCKING //
     ///////////////////////////
         
-    connectTime_a = ofGetSystemTime(); // start time
+    connectTime_a = ofGetSystemTimeMillis(); // start time
     nextAutoRetry_a = 0;
     
     elapsedTime_a = 0;
@@ -480,10 +480,11 @@ void IPVideoGrabber::threadedFunction()
     
     // basic session info
     session.setKeepAlive(true);
-    session.setTimeout(Poco::Timespan(sessionTimeout / 1000,0)); // 20 sececond timeout
+    session.setTimeout(Poco::Timespan(sessionTimeout * Poco::Timespan::MILLISECONDS));
     
     // add trailing slash if nothing is there
     std::string path(uri_a.getPathAndQuery());
+    
     if (path.empty()) path = "/";
 
     // create our header request
@@ -711,7 +712,7 @@ void IPVideoGrabber::threadedFunction()
         mutex.lock();
         needsReconnect_a = true;
 //        _isConnected = false;
-        nextAutoRetry_a = ofGetSystemTime() + autoRetryDelay_a;
+        nextAutoRetry_a = ofGetSystemTimeMillis() + autoRetryDelay_a;
         mutex.unlock();
         ofLogError("IPVideoGrabber") << "Exception : [" << getCameraName() << "]: " <<  e.displayText();
     }
@@ -720,7 +721,7 @@ void IPVideoGrabber::threadedFunction()
         mutex.lock();
         needsReconnect_a = true;
 //        _isConnected = false;
-        nextAutoRetry_a = ofGetSystemTime() + autoRetryDelay_a;
+        nextAutoRetry_a = ofGetSystemTimeMillis() + autoRetryDelay_a;
         mutex.unlock();
         ofLogError("IPVideoGrabber") << "Unknown exception.";
     }
@@ -808,7 +809,7 @@ std::vector<ofTexture>& IPVideoGrabber::getTexturePlanes()
 }
 
 
-const vector<ofTexture>& IPVideoGrabber::getTexturePlanes() const
+const std::vector<ofTexture>& IPVideoGrabber::getTexturePlanes() const
 {
 	texPlanes.clear();
 	texPlanes.push_back(getTexture());
