@@ -14,7 +14,9 @@
 #include "Poco/Net/HTTPClientSession.h"
 #include "Poco/Net/NameValueCollection.h"
 #include "ofJson.h"
-#include "ofBaseTypes.h"
+#include "ofPixels.h"
+#include "ofRectangle.h"
+#include "ofVideoBaseTypes.h"
 
 
 namespace ofx {
