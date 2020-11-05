@@ -1,0 +1,3 @@
+ofxIpVideoGrabber
+ofxPoco
+ofxXmlSettings
