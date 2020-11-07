@@ -14,7 +14,9 @@ void ofApp::setup()
 
     // Set the camera URL.
     // Many axis cameras allow video resolution, fps, etc to be manipulated with url arguments.
-    grabber.setURI("http://zbc01.elpasotexas.gov/axis-cgi/mjpg/video.cgi?fps=2");
+    // N.B. If you don't see an image, the camera may be offline or no longer in service and
+    // this link may need to be replaced with a valid link.
+    grabber.setURI("http://107.1.228.34/axis-cgi/mjpg/video.cgi?resolution=320x240");
 
     // Connect to the stream.
     grabber.connect();
